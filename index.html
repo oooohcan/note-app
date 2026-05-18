@@ -1,0 +1,1284 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#4B7BFF">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="待办清单">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxODAgMTgwIj48cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgcng9IjM2IiBmaWxsPSIjNEE5MEQ5Ii8+PHBhdGggZD0iTTgwIDEyMGwtMjYtMjYgOC04IDE4IDE4IDM4LTM4IDggOHoiIGZpbGw9IiNmZmYiLz48L3N2Zz4=">
+<link rel="manifest" href="./manifest.json">
+<title>待办清单</title>
+<style>
+/* ================================================================
+   1. 变量与重置
+   ================================================================ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F5F5F7;--card:#FDFDFD;--primary:#4B7BFF;--primary-dark:#6C5CE7;
+  --text:#1C1C1E;--text-secondary:#8E8E93;--text-done:#B0B0B8;
+  --border:#E5E5EA;--hover:#F2F2F7;--danger:#D95050;--danger-hover:#C04040;
+  --amber:#C08A30;--amber-bg:#FDF8F0;--shadow:0 1px 3px rgba(0,0,0,.06);
+  --card-border:1px solid #DADAE0;
+  --radius:10px;--radius-sm:8px;--radius-xs:6px;
+  --font:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  --gradient:linear-gradient(135deg,#4B7BFF,#6C5CE7);
+}
+body{
+  font-family:var(--font);background:var(--bg);color:var(--text);
+  min-height:100vh;min-height:100dvh;line-height:1.5;
+  -webkit-tap-highlight-color:transparent;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ================================================================
+   2. 布局
+   ================================================================ */
+.app{max-width:600px;margin:0 auto;padding:0 16px 100px}
+
+/* 顶栏 */
+.header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:max(24px,env(safe-area-inset-top,0px)) 0 12px;position:sticky;top:0;z-index:10;
+  background:var(--bg);backdrop-filter:blur(8px);
+}
+.header h1{font-size:24px;font-weight:700;letter-spacing:-0.3px;color:var(--text)}
+.header-btns{display:flex;gap:8px;align-items:center}
+.header-btns button{
+  height:36px;border-radius:18px;border:1px solid var(--border);background:var(--card);
+  cursor:pointer;font-size:13px;font-weight:500;color:var(--text-secondary);
+  padding:0 14px;transition:all .15s ease;font-family:var(--font);
+  display:flex;align-items:center;gap:4px;
+}
+.header-btns button:active{transform:scale(.96);background:var(--hover)}
+.save-status{font-size:11px;color:var(--text-secondary);margin-left:8px;margin-right:auto}
+.save-status.dirty{color:var(--amber);font-weight:600}
+.save-status.syncing{color:var(--primary)}
+.save-status.error{color:var(--danger)}
+
+/* 添加栏 */
+.add-bar{
+  display:flex;gap:8px;margin:8px 0 20px;padding-top:4px;
+}
+.add-bar input{
+  flex:1;padding:12px 16px;border:1.5px solid var(--border);border-radius:var(--radius);
+  font-size:15px;font-family:var(--font);background:var(--card);
+  transition:border-color .2s ease;outline:none;color:var(--text);
+}
+.add-bar input:focus{border-color:var(--primary)}
+.add-bar input::placeholder{color:#C0C0C8}
+.add-bar .btn-add-top{
+  padding:12px 18px;background:var(--gradient);color:#fff;border:none;
+  border-radius:var(--radius);font-size:14px;font-weight:600;cursor:pointer;
+  transition:all .15s ease;white-space:nowrap;font-family:var(--font);
+}
+.add-bar .btn-add-top:active{transform:scale(.96);opacity:.85}
+
+/* 底栏 */
+.save-bar{
+  position:fixed;bottom:0;left:0;right:0;max-width:600px;margin:0 auto;
+  padding:12px 20px;padding-bottom:max(12px,env(safe-area-inset-bottom,12px));
+  display:flex;align-items:center;justify-content:center;z-index:10;
+}
+.btn-save{
+  padding:11px 32px;background:var(--gradient);color:#fff;border:none;
+  border-radius:24px;font-size:14px;font-weight:600;cursor:pointer;
+  transition:all .15s ease;box-shadow:0 2px 8px rgba(75,123,255,.25);
+  font-family:var(--font);letter-spacing:0.3px;
+}
+.btn-save:active{transform:scale(.96);opacity:.85}
+.btn-save:disabled{background:#C8C8D0;box-shadow:none;cursor:not-allowed;transform:none}
+
+/* 返回栏 */
+.back-bar{margin-bottom:12px}
+.btn-back{
+  padding:8px 0;border:none;background:none;cursor:pointer;font-size:14px;
+  color:var(--primary);font-weight:600;transition:all .12s ease;font-family:var(--font);
+}
+.btn-back:active{opacity:.6}
+
+/* ================================================================
+   3. 待办列表
+   ================================================================ */
+.todo-list,.recycle-list{display:flex;flex-direction:column;gap:10px}
+.todo-item{
+  background:var(--card);border-radius:var(--radius);
+  border:var(--card-border);box-shadow:var(--shadow);
+  transition:all .15s ease;overflow:hidden;
+  user-select:none;-webkit-user-select:none;
+}
+.todo-item:active{transform:scale(.985)}
+.todo-row{display:flex;align-items:center;gap:8px;padding:12px 14px}
+.children{margin-left:16px;padding:0 12px 8px 12px;display:flex;flex-direction:column;gap:8px}
+.children .children .children .children .children{margin-left:8px;padding:0 6px 4px 8px}
+
+/* 空状态 */
+.empty-state{text-align:center;padding:56px 20px;color:var(--text-secondary)}
+.empty-state p{font-size:14px;line-height:1.6}
+
+/* ================================================================
+   4. 控件
+   ================================================================ */
+/* 勾选框 */
+.btn-check{
+  width:20px;height:20px;border-radius:50%;border:1.5px solid #C8C8CE;
+  background:none;cursor:pointer;flex-shrink:0;padding:0;
+  transition:all .2s ease;position:relative;
+}
+.btn-check:active{transform:scale(.85)}
+.btn-check.checked{background:var(--gradient);border-color:transparent}
+.btn-check.checked::after{
+  content:'';position:absolute;top:4px;left:6px;
+  width:5px;height:9px;border:solid #fff;border-width:0 2px 2px 0;
+  transform:rotate(45deg);
+}
+
+/* 文字 */
+.todo-text{flex:1;font-size:15px;line-height:1.4;word-break:break-word;color:var(--text);overflow:hidden;min-width:0}
+.todo-actions{display:flex;gap:2px;flex-shrink:0;margin-left:auto}
+
+/* 操作按钮公共 */
+.btn-sub,.btn-del,.btn-restore,.btn-permadel{
+  width:30px;height:30px;border-radius:50%;border:none;background:transparent;
+  cursor:pointer;font-size:16px;transition:all .12s ease;
+  display:inline-flex;align-items:center;justify-content:center;
+  color:var(--text-secondary);padding:0;font-family:var(--font);
+}
+.btn-sub:active,.btn-del:active,.btn-restore:active,.btn-permadel:active{transform:scale(.9)}
+
+/* 添加子任务 */
+.btn-sub{color:var(--primary)}
+.btn-sub:active,.btn-sub:hover{background:#EEF2FF}
+
+/* 删除 */
+.btn-del{color:var(--danger);font-size:14px;font-weight:700}
+.btn-del:active,.btn-del:hover{background:#FFF0F0}
+.btn-del.confirm{width:auto;border-radius:14px;padding:0 10px;font-size:11px;font-weight:600;background:var(--danger);color:#fff}
+.btn-del.confirm:active,.btn-del.confirm:hover{background:var(--danger-hover)}
+
+/* 恢复 / 彻底删除 */
+.btn-restore{color:var(--primary);width:auto;border-radius:14px;padding:0 12px;font-size:12px;font-weight:600}
+.btn-permadel{color:var(--danger);width:auto;border-radius:14px;padding:0 12px;font-size:12px;font-weight:600}
+
+/* 折叠 */
+.btn-collapse{
+  width:20px;height:20px;border:none;background:none;cursor:pointer;
+  font-size:9px;color:#B0B0B8;padding:0;flex-shrink:0;
+  transition:all .15s ease;display:flex;align-items:center;justify-content:center;
+}
+.btn-collapse:active{transform:scale(.8)}
+.collapsed-hint{font-size:11px;color:var(--text-secondary);padding:4px 14px 10px}
+
+/* 行内编辑 / 添加 */
+.inline-input{
+  width:100%;min-width:0;padding:6px 10px;border:1.5px solid var(--primary);border-radius:var(--radius-xs);
+  font-size:15px;font-family:var(--font);outline:none;background:var(--card);
+}
+.inline-add-row{
+  display:flex;align-items:center;gap:8px;padding:6px 14px 12px;
+}
+.inline-add-row input{
+  flex:1;padding:8px 12px;border:1.5px solid var(--primary);border-radius:var(--radius-xs);
+  font-size:14px;font-family:var(--font);outline:none;background:var(--card);
+}
+.inline-add-row .btn-confirm-add{
+  width:32px;height:32px;border:none;background:var(--gradient);color:#fff;
+  border-radius:50%;cursor:pointer;font-size:14px;display:flex;align-items:center;
+  justify-content:center;transition:all .12s ease;flex-shrink:0;padding:0;
+}
+.inline-add-row .btn-confirm-add:active{transform:scale(.9);opacity:.85}
+
+/* ================================================================
+   5. 回收站
+   ================================================================ */
+.recycle-list{display:flex;flex-direction:column;gap:12px}
+.bin-item{
+  background:var(--card);border-radius:var(--radius);
+  border:var(--card-border);box-shadow:var(--shadow);
+  padding:14px 16px;display:flex;align-items:center;gap:12px;
+  transition:all .15s ease;border-left:3px solid var(--primary);
+  opacity:.85;
+}
+.bin-item:active{transform:scale(.985)}
+.bin-text{flex:1;font-size:15px;word-break:break-word;color:var(--text)}
+.bin-date{font-size:11px;color:var(--text-secondary);white-space:nowrap;flex-shrink:0}
+.bin-actions{display:flex;gap:2px;flex-shrink:0}
+
+/* ================================================================
+   6. 模态框与提示
+   ================================================================ */
+.modal-overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);
+  z-index:100;align-items:center;justify-content:center;
+  backdrop-filter:blur(3px);
+}
+.modal-overlay.open{display:flex}
+.modal{
+  background:var(--card);border-radius:var(--radius);padding:24px;
+  width:calc(100% - 48px);max-width:380px;box-shadow:0 8px 32px rgba(0,0,0,.1);
+}
+.modal h2{font-size:17px;margin-bottom:18px;color:var(--text);font-weight:700}
+.modal p{font-size:13px;color:var(--text-secondary);margin-bottom:8px;line-height:1.5}
+.field-label{font-size:13px;font-weight:600;color:var(--text);display:block;margin-bottom:6px}
+.modal input{
+  width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);
+  font-size:14px;font-family:var(--font);outline:none;margin-bottom:6px;
+  transition:border-color .2s;background:var(--card);
+}
+.modal input:focus{border-color:var(--primary)}
+.modal .btn-row{display:flex;gap:8px;justify-content:flex-end}
+.modal .btn-row button{
+  padding:9px 18px;border-radius:18px;font-size:13px;font-weight:600;
+  cursor:pointer;border:none;transition:all .12s ease;font-family:var(--font);
+}
+.modal .btn-cancel{background:var(--hover);color:var(--text-secondary)}
+.modal .btn-cancel:active{transform:scale(.96)}
+.modal .btn-confirm{background:var(--gradient);color:#fff}
+.modal .btn-confirm:active{transform:scale(.96);opacity:.85}
+.modal .err-msg{color:var(--danger);font-size:12px;margin-bottom:8px;display:none}
+.modal a{color:var(--primary);font-size:12px;display:inline-block;margin-bottom:10px}
+
+/* 开关 */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;margin:4px 0 6px}
+.toggle-row span{font-size:14px;color:var(--text)}
+.toggle-switch{position:relative;width:46px;height:26px;flex-shrink:0}
+.toggle-switch input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:#D1D1D6;border-radius:13px;cursor:pointer;transition:background .25s}
+.toggle-slider::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;background:#fff;border-radius:50%;transition:transform .25s;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.toggle-switch input:checked+.toggle-slider{background:var(--gradient)}
+.toggle-switch input:checked+.toggle-slider::after{transform:translateX(20px)}
+
+/* Toast */
+.toast-container{
+  position:fixed;top:calc(20px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:200;
+  display:flex;flex-direction:column;gap:8px;pointer-events:none;
+}
+.toast{
+  padding:10px 20px;border-radius:20px;font-size:13px;font-weight:500;
+  color:#fff;pointer-events:auto;animation:toastIn .3s ease;
+  box-shadow:0 4px 12px rgba(0,0,0,.15);text-align:center;
+}
+.toast.success{background:#34C759}
+.toast.error{background:var(--danger)}
+.toast.info{background:var(--primary)}
+@keyframes toastIn{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
+
+/* ================================================================
+   7. 拖拽状态
+   ================================================================ */
+.todo-item.completed{opacity:.6}
+.completed .todo-text{color:var(--text-done);text-decoration:line-through}
+.todo-item.dragging{opacity:.35;transform:scale(.97)}
+.todo-item.drag-over-before{border-top:3px solid var(--primary);border-radius:0}
+.todo-item.drag-over-after{border-bottom:3px solid var(--primary);border-radius:0}
+.todo-item.drag-over-child{box-shadow:0 0 0 2px var(--primary);background:#F0F4FF}
+.drag-clone{
+  position:fixed;z-index:999;pointer-events:none;
+  background:var(--card);border:var(--card-border);border-radius:var(--radius);
+  box-shadow:0 8px 24px rgba(0,0,0,.15);padding:10px 14px;
+  font-size:15px;color:var(--text);opacity:.92;
+  max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  font-family:var(--font);transform:translate(-50%,-50%) rotate(2deg);
+}
+
+/* ================================================================
+   8. 工具类与加载
+   ================================================================ */
+.loading{text-align:center;padding:56px 20px;color:var(--text-secondary)}
+.spinner{
+  width:28px;height:28px;border:2.5px solid var(--border);border-top-color:var(--primary);
+  border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 14px;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#ccc;border-radius:2px}
+
+/* ================================================================
+   9. 响应式
+   ================================================================ */
+@media(max-width:480px){
+  .header{padding:max(18px,env(safe-area-inset-top,0px)) 0 14px}
+  .header h1{font-size:22px}
+  .app{padding:0 12px 90px}
+  .todo-row{padding:10px 12px}
+  .save-bar{padding:10px 12px;padding-bottom:max(10px,env(safe-area-inset-bottom,10px))}
+  .btn-save{padding:11px 28px;font-size:13px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="header">
+    <h1>待办清单</h1>
+    <span class="save-status" id="saveStatus">已同步</span>
+    <div class="header-btns">
+      <button id="btnBin">回收站</button>
+      <button id="btnSettings">设置</button>
+    </div>
+  </header>
+
+  <div class="add-bar" id="addBar">
+    <input type="text" id="addInput" placeholder="添加新任务..." maxlength="500">
+    <button class="btn-add-top" id="btnAdd">添加</button>
+  </div>
+
+  <div class="todo-list" id="todoList"></div>
+  <div class="recycle-list" id="recycleList" style="display:none">
+    <div class="back-bar"><button class="btn-back" id="btnBack">‹ 返回</button></div>
+    <div id="recycleItems"></div>
+  </div>
+</div>
+
+<div class="save-bar" id="saveBar">
+  <button class="btn-save" id="btnSave" disabled>保存</button>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal">
+    <h2>设置</h2>
+    <label class="field-label">Gitee 访问令牌</label>
+    <input type="password" id="tokenInput" placeholder="粘贴令牌...">
+    <a href="https://gitee.com/profile/personal_access_tokens" target="_blank">前往 Gitee 创建令牌 &rarr;</a>
+    <div class="err-msg" id="tokenError"></div>
+    <div class="toggle-row">
+      <span>显示已完成待办</span>
+      <label class="toggle-switch"><input type="checkbox" id="toggleShowCompleted"><span class="toggle-slider"></span></label>
+    </div>
+    <div class="btn-row">
+      <button class="btn-cancel" id="btnTokenCancel">取消</button>
+      <button class="btn-confirm" id="btnTokenSave">保存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+'use strict';
+
+// ======================================================================
+// 0. h() — 轻量 DOM 构建器
+// ======================================================================
+function h(tag, attrs, children) {
+  var el = document.createElement(tag);
+  if (attrs) {
+    for (var key in attrs) {
+      var val = attrs[key];
+      if (key === 'class') el.className = val;
+      else if (key === 'data') { for (var dk in val) el.dataset[dk] = val[dk]; }
+      else if (key === 'html') el.innerHTML = val;
+      else if (key === 'style') el.style.cssText = val;
+      else if (val !== false && val !== undefined && val !== null) el.setAttribute(key, val);
+    }
+  }
+  if (children !== undefined && children !== null) {
+    var append = function(c) {
+      if (c == null) return;
+      if (c instanceof Node) el.appendChild(c);
+      else if (Array.isArray(c)) c.forEach(append);
+      else el.appendChild(document.createTextNode(String(c)));
+    };
+    append(children);
+  }
+  return el;
+}
+
+// ======================================================================
+// 1. DragDrop — 拖拽排序模块
+// ======================================================================
+function DragDrop(app) {
+  this.app = app;
+  this.active = false;
+  this.id = null;
+  this.clone = null;
+  this.timer = null;
+  this.over = null;
+  this.overZone = null;
+  this.sx = 0; this.sy = 0; this.cx = 0; this.cy = 0;
+}
+
+DragDrop.prototype.clearOver = function() {
+  if (this.over) {
+    this.over.classList.remove('drag-over-before', 'drag-over-after', 'drag-over-child');
+    this.over = null;
+    this.overZone = null;
+  }
+};
+
+DragDrop.prototype.start = function(el, cx, cy) {
+  this.active = true;
+  this.id = el.dataset.id;
+  this.sx = cx; this.sy = cy; this.cx = cx; this.cy = cy;
+  el.classList.add('dragging');
+  this.clone = h('div', { class: 'drag-clone' }, el.querySelector('.todo-text').textContent);
+  document.body.appendChild(this.clone);
+  this.clone.style.left = cx + 'px';
+  this.clone.style.top = cy + 'px';
+};
+
+DragDrop.prototype.move = function(cx, cy) {
+  if (!this.active) return;
+  this.cx = cx; this.cy = cy;
+  if (this.clone) { this.clone.style.left = cx + 'px'; this.clone.style.top = cy + 'px'; }
+  this.clearOver();
+  var el = document.elementFromPoint(cx, cy);
+  var item = el ? el.closest('.todo-item') : null;
+  if (item && item.dataset.id && item.dataset.id !== this.id) {
+    var rect = item.getBoundingClientRect();
+    var ry = (cy - rect.top) / rect.height;
+    if (ry < 0.3) { item.classList.add('drag-over-before'); this.overZone = 'before'; }
+    else if (ry > 0.7) { item.classList.add('drag-over-after'); this.overZone = 'after'; }
+    else { item.classList.add('drag-over-child'); this.overZone = 'child'; }
+    this.over = item;
+  }
+};
+
+DragDrop.prototype.end = function() {
+  if (!this.active) { this.cancel(); return; }
+  var srcId = this.id;
+  var tgtId = this.over ? this.over.dataset.id : null;
+  var zone = this.overZone;
+  this.cancel();
+  if (srcId && tgtId && zone && srcId !== tgtId) {
+    App.treeMoveItem(srcId, tgtId, zone);
+  }
+};
+
+DragDrop.prototype.cancel = function() {
+  clearTimeout(this.timer);
+  this.clearOver();
+  if (this.clone) { this.clone.remove(); this.clone = null; }
+  if (this.id) {
+    var el = document.querySelector('.todo-item[data-id="' + this.id + '"]');
+    if (el) el.classList.remove('dragging');
+  }
+  this.active = false; this.id = null;
+  this.sx = this.sy = this.cx = this.cy = 0;
+};
+
+// ======================================================================
+// 2. App — 应用核心
+// ======================================================================
+var App = {
+  // ---- State ----
+  state: {
+    todos: [],
+    recycleBin: [],
+    fileSha: null,
+    showingRecycleBin: false,
+    collapsed: {},
+    showCompleted: localStorage.getItem('showCompleted') === 'true',
+    deleteConfirm: null,
+    dirty: false,
+    syncing: false,
+    loading: true
+  },
+
+  dnd: null,
+
+  // ---- DOM 缓存 ----
+  dom: {},
+
+  cacheDom: function() {
+    var ids = ['todoList','recycleList','recycleItems','addBar','addInput',
+               'btnAdd','btnBin','btnBack','saveStatus','btnSave','btnSettings',
+               'settingsModal','tokenInput','tokenError','toastContainer'];
+    for (var i = 0; i < ids.length; i++) {
+      App.dom[ids[i]] = document.getElementById(ids[i]);
+    }
+  },
+
+  // ==================== 工具函数 ====================
+
+  uid: function() {
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+      return crypto.randomUUID();
+    }
+    return 'xxxx-xxxx-xxxx-xxxx'.replace(/x/g, function() { return (Math.random() * 16 | 0).toString(16); });
+  },
+
+  toBase64: function(str) {
+    var bytes = new TextEncoder().encode(str);
+    var binary = '';
+    for (var i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+    return btoa(binary);
+  },
+
+  fromBase64: function(b64) {
+    var binary = atob(b64);
+    var bytes = new Uint8Array(binary.length);
+    for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return new TextDecoder().decode(bytes);
+  },
+
+  fmtDate: function(iso) {
+    var d = new Date(iso);
+    var now = new Date();
+    var diff = now - d;
+    if (diff < 60000) return '刚刚';
+    if (diff < 3600000) return Math.floor(diff / 60000) + '分钟前';
+    if (diff < 86400000) return Math.floor(diff / 3600000) + '小时前';
+    return d.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  },
+
+  toast: function(msg, type) {
+    type = type || 'info';
+    var el = h('div', { class: 'toast ' + type }, msg);
+    App.dom.toastContainer.appendChild(el);
+    setTimeout(function() { el.remove(); }, 2500);
+  },
+
+  // ==================== 状态管理 ====================
+
+  markDirty: function() {
+    App.state.dirty = true;
+    App.updateSaveUI();
+  },
+
+  updateSaveUI: function() {
+    var st = App.state;
+    if (st.syncing) {
+      App.dom.saveStatus.textContent = '保存中...';
+      App.dom.saveStatus.className = 'save-status syncing';
+      App.dom.btnSave.disabled = true;
+    } else if (st.dirty) {
+      App.dom.saveStatus.textContent = '有未保存的更改';
+      App.dom.saveStatus.className = 'save-status dirty';
+      App.dom.btnSave.disabled = false;
+    } else {
+      App.dom.saveStatus.textContent = '已同步';
+      App.dom.saveStatus.className = 'save-status';
+      App.dom.btnSave.disabled = true;
+    }
+  },
+
+  // ==================== API 层 ====================
+
+  API_BASE: 'https://gitee.com/api/v5',
+  REPO_OWNER: 'oooohcan',
+  REPO_NAME: 'note',
+  DATA_PATH: 'todos.json',
+
+  apiGetToken: function() {
+    return localStorage.getItem('gitee_token') || '';
+  },
+
+  apiSetToken: function(t) {
+    localStorage.setItem('gitee_token', t);
+  },
+
+  apiUrl: function(url) {
+    var sep = url.indexOf('?') >= 0 ? '&' : '?';
+    return url + sep + 'access_token=' + encodeURIComponent(App.apiGetToken());
+  },
+
+  apiGetFile: async function() {
+    var url = App.API_BASE + '/repos/' + App.REPO_OWNER + '/' + App.REPO_NAME + '/contents/' + App.DATA_PATH;
+    var res = await fetch(App.apiUrl(url), { headers: { 'Content-Type': 'application/json' } });
+    if (res.status === 404) return null;
+    if (!res.ok) {
+      if (res.status === 401) throw new Error('TOKEN_INVALID');
+      throw new Error('API error: ' + res.status);
+    }
+    return res.json();
+  },
+
+  apiCreateFile: async function(content, message) {
+    var url = App.API_BASE + '/repos/' + App.REPO_OWNER + '/' + App.REPO_NAME + '/contents/' + App.DATA_PATH;
+    var res = await fetch(App.apiUrl(url), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        access_token: App.apiGetToken(),
+        content: App.toBase64(content),
+        message: message
+      })
+    });
+    if (!res.ok) throw new Error('Create failed: ' + res.status);
+    var data = await res.json();
+    return data.content.sha;
+  },
+
+  apiUpdateFile: async function(content, sha, message) {
+    var url = App.API_BASE + '/repos/' + App.REPO_OWNER + '/' + App.REPO_NAME + '/contents/' + App.DATA_PATH;
+    var res = await fetch(App.apiUrl(url), {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        access_token: App.apiGetToken(),
+        content: App.toBase64(content),
+        sha: sha,
+        message: message
+      })
+    });
+    if (res.status === 409) throw new Error('CONFLICT');
+    if (!res.ok) throw new Error('Update failed: ' + res.status);
+    var data = await res.json();
+    return data.content.sha;
+  },
+
+  apiTestToken: async function(token) {
+    var url = App.API_BASE + '/repos/' + App.REPO_OWNER + '/' + App.REPO_NAME + '?access_token=' + encodeURIComponent(token);
+    var res = await fetch(url);
+    return res.ok;
+  },
+
+  // ==================== 树操作 ====================
+
+  treeFindById: function(list, id) {
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].id === id) return list[i];
+      if (list[i].children) {
+        var found = App.treeFindById(list[i].children, id);
+        if (found) return found;
+      }
+    }
+    return null;
+  },
+
+  treeRemoveById: function(list, id) {
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].id === id) { list.splice(i, 1); return true; }
+      if (list[i].children && App.treeRemoveById(list[i].children, id)) return true;
+    }
+    return false;
+  },
+
+  treeRemoveByIdWithParent: function(list, id) {
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].id === id) return { item: list.splice(i, 1)[0], parent: list, index: i };
+      if (list[i].children) {
+        var r = App.treeRemoveByIdWithParent(list[i].children, id);
+        if (r) return r;
+      }
+    }
+    return null;
+  },
+
+  treeGetDepth: function(list, id, depth) {
+    depth = depth || 0;
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].id === id) return depth;
+      if (list[i].children) {
+        var d = App.treeGetDepth(list[i].children, id, depth + 1);
+        if (d >= 0) return d;
+      }
+    }
+    return -1;
+  },
+
+  treeFilter: function(list) {
+    if (App.state.showCompleted) return list;
+    return list.filter(function(item) { return !item.completed; }).map(function(item) {
+      return { id: item.id, text: item.text, completed: item.completed, children: App.treeFilter(item.children || []) };
+    });
+  },
+
+  treeSort: function(list) {
+    var active = list.filter(function(i) { return !i.completed; });
+    var done = list.filter(function(i) { return i.completed; });
+    var result = active.concat(done);
+    for (var i = 0; i < result.length; i++) {
+      if (result[i].children && result[i].children.length) {
+        result[i].children = App.treeSort(result[i].children);
+      }
+    }
+    return result;
+  },
+
+  treeFindParent: function(list, id) {
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].id === id) return list;
+      if (list[i].children && list[i].children.length) {
+        for (var j = 0; j < list[i].children.length; j++) {
+          if (list[i].children[j].id === id) return list[i].children;
+        }
+        var r = App.treeFindParent(list[i].children, id);
+        if (r) return r;
+      }
+    }
+    return null;
+  },
+
+  treeIsDescendant: function(list, ancestorId) {
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].id === ancestorId) return true;
+      if (list[i].children && list[i].children.length && App.treeIsDescendant(list[i].children, ancestorId)) return true;
+    }
+    return false;
+  },
+
+  treeMoveItem: function(sourceId, targetId, position) {
+    if (sourceId === targetId) return;
+
+    var srcItem = App.treeFindById(App.state.todos, sourceId);
+    if (!srcItem) return;
+    if (App.treeIsDescendant(srcItem.children, targetId)) return;
+
+    if (position === 'child') {
+      var depth = App.treeGetDepth(App.state.todos, targetId);
+      if (depth >= 5) return;
+    }
+
+    var removed = App.treeRemoveByIdWithParent(App.state.todos, sourceId);
+    if (!removed) return;
+    var src = removed.item;
+
+    var targetParent = App.treeFindParent(App.state.todos, targetId);
+    if (!targetParent) return;
+    var tgtIdx = -1;
+    for (var i = 0; i < targetParent.length; i++) {
+      if (targetParent[i].id === targetId) { tgtIdx = i; break; }
+    }
+    if (tgtIdx < 0) return;
+
+    if (position === 'child') {
+      var targetItem = targetParent[tgtIdx];
+      if (!targetItem.children) targetItem.children = [];
+      targetItem.children.push(src);
+      targetItem.completed = false;
+    } else {
+      var insertIdx = position === 'before' ? tgtIdx : tgtIdx + 1;
+      targetParent.splice(insertIdx, 0, src);
+    }
+    App.markDirty();
+    App.renderAll();
+  },
+
+  // ==================== 数据持久化 ====================
+
+  dataLoad: async function() {
+    try {
+      var file = await App.apiGetFile();
+      if (file === null) {
+        App.state.todos = [];
+        App.state.recycleBin = [];
+        App.state.fileSha = null;
+      } else {
+        var json = App.fromBase64(file.content);
+        var data = JSON.parse(json);
+        App.state.todos = App.treeSort(data.todos || []);
+        App.state.recycleBin = data.recycleBin || [];
+        App.state.fileSha = file.sha;
+      }
+    } catch (e) {
+      if (e.message === 'TOKEN_INVALID') {
+        App.toast('令牌无效，请在设置中更新', 'error');
+        App.settingsShow();
+      } else {
+        App.toast('加载失败：' + e.message, 'error');
+      }
+    }
+    App.state.loading = false;
+    App.state.dirty = false;
+    App.updateSaveUI();
+    App.renderAll();
+  },
+
+  dataSave: async function() {
+    if (App.state.syncing) return;
+    App.state.syncing = true;
+    App.updateSaveUI();
+    try {
+      var json = JSON.stringify({ todos: App.state.todos, recycleBin: App.state.recycleBin }, null, 2);
+      var file = await App.apiGetFile();
+      var sha = file ? file.sha : App.state.fileSha;
+      if (sha) {
+        sha = await App.apiUpdateFile(json, sha, 'Update todos.json');
+      } else {
+        sha = await App.apiCreateFile(json, 'Create todos.json');
+      }
+      App.state.fileSha = sha;
+      App.state.dirty = false;
+      App.toast('保存成功', 'success');
+    } catch (e) {
+      if (e.message === 'CONFLICT') {
+        try {
+          var file2 = await App.apiGetFile();
+          var json2 = JSON.stringify({ todos: App.state.todos, recycleBin: App.state.recycleBin }, null, 2);
+          var sha2 = file2 ? file2.sha : null;
+          if (sha2) {
+            sha2 = await App.apiUpdateFile(json2, sha2, 'Update todos.json (conflict resolved)');
+          } else {
+            sha2 = await App.apiCreateFile(json2, 'Create todos.json');
+          }
+          App.state.fileSha = sha2;
+          App.state.dirty = false;
+          App.toast('已解决冲突并保存', 'success');
+        } catch (e2) {
+          App.toast('保存失败，请重试', 'error');
+        }
+      } else {
+        App.toast('保存失败：' + e.message, 'error');
+      }
+    }
+    App.state.syncing = false;
+    App.updateSaveUI();
+  },
+
+  // ==================== 渲染引擎 ====================
+
+  renderCheckbox: function(item) {
+    return h('button', { class: 'btn-check' + (item.completed ? ' checked' : ''), data: { action: 'toggle', id: item.id } });
+  },
+
+  renderTodoItem: function(item, level) {
+    level = level || 0;
+    var hasChildren = item.children && item.children.length;
+    var isCollapsed = App.state.collapsed[item.id];
+    var confirmDelete = App.state.deleteConfirm === item.id;
+
+    var collapseBtn;
+    if (hasChildren) {
+      collapseBtn = h('button', { class: 'btn-collapse', data: { action: 'collapse', id: item.id }, html: isCollapsed ? '&#9654;' : '&#9660;' });
+    } else {
+      collapseBtn = h('span', { class: 'btn-collapse', style: 'visibility:hidden' });
+    }
+
+    var actionBtns = [];
+    if (level < 5) {
+      actionBtns.push(h('button', { class: 'btn-sub', data: { action: 'addSub', id: item.id }, title: '添加子任务' }, '+'));
+    }
+    var delCls = 'btn-del' + (confirmDelete ? ' confirm' : '');
+    actionBtns.push(h('button', { class: delCls, data: { action: 'delete', id: item.id }, html: confirmDelete ? '删除' : '&times;' }));
+
+    var childrenContent = [];
+    if (hasChildren) {
+      if (isCollapsed) {
+        childrenContent.push(h('div', { class: 'collapsed-hint' }, item.children.length + ' 项已折叠'));
+      } else {
+        var childNodes = [];
+        for (var i = 0; i < item.children.length; i++) {
+          childNodes.push(App.renderTodoItem(item.children[i], level + 1));
+        }
+        childrenContent.push(h('div', { class: 'children' }, childNodes));
+      }
+    }
+
+    var itemCls = 'todo-item' + (item.completed ? ' completed' : '');
+    var children = [h('div', { class: 'todo-row' }, [
+      collapseBtn,
+      App.renderCheckbox(item),
+      h('span', { class: 'todo-text', data: { action: 'edit', id: item.id } }, item.text),
+      h('div', { class: 'todo-actions' }, actionBtns)
+    ])].concat(childrenContent);
+
+    return h('div', { class: itemCls, data: { id: item.id } }, children);
+  },
+
+  renderTodoList: function() {
+    var list = App.dom.todoList;
+    list.innerHTML = '';
+
+    if (App.state.loading) {
+      list.appendChild(h('div', { class: 'loading' }, [h('div', { class: 'spinner' }), h('p', null, '加载中...')]));
+      return;
+    }
+
+    if (App.state.todos.length === 0) {
+      list.appendChild(h('div', { class: 'empty-state' }, h('p', { html: '还没有待办事项<br>在上方输入框添加第一个任务吧' })));
+      return;
+    }
+
+    var visible = App.treeFilter(App.state.todos);
+    for (var i = 0; i < visible.length; i++) {
+      list.appendChild(App.renderTodoItem(visible[i], 0));
+    }
+  },
+
+  renderRecycleBin: function() {
+    var container = App.dom.recycleItems;
+    container.innerHTML = '';
+
+    if (App.state.recycleBin.length === 0) {
+      container.appendChild(h('div', { class: 'empty-state' }, h('p', null, '回收站为空')));
+      return;
+    }
+
+    for (var i = 0; i < App.state.recycleBin.length; i++) {
+      var item = App.state.recycleBin[i];
+      container.appendChild(
+        h('div', { class: 'bin-item', data: { id: item.id } }, [
+          h('span', { class: 'bin-text' }, item.text),
+          h('span', { class: 'bin-date' }, App.fmtDate(item.deletedAt)),
+          h('div', { class: 'bin-actions' }, [
+            h('button', { class: 'btn-restore', data: { action: 'restore', id: item.id } }, '↩ 恢复'),
+            h('button', { class: 'btn-permadel', data: { action: 'permDelete', id: item.id } }, '✕ 彻底删除')
+          ])
+        ])
+      );
+    }
+  },
+
+  renderAll: function() {
+    App.renderTodoList();
+    App.renderRecycleBin();
+    if (App.state.showingRecycleBin) {
+      App.dom.todoList.style.display = 'none';
+      App.dom.recycleList.style.display = '';
+      App.dom.addBar.style.display = 'none';
+    } else {
+      App.dom.todoList.style.display = '';
+      App.dom.recycleList.style.display = 'none';
+      App.dom.addBar.style.display = '';
+    }
+  },
+
+  // ---- 行内添加子任务 ----
+  renderInlineAdd: function(parentId) {
+    var existing = document.querySelector('.inline-add-row');
+    if (existing) existing.remove();
+
+    var parentItem = document.querySelector('.todo-item[data-id="' + parentId + '"]');
+    if (!parentItem) return;
+
+    var childrenEl = parentItem.querySelector(':scope > .children');
+    if (!childrenEl) {
+      childrenEl = h('div', { class: 'children' });
+      parentItem.appendChild(childrenEl);
+    }
+
+    var input = h('input', { type: 'text', placeholder: '输入子任务...', maxlength: '500' });
+    var confirmBtn = h('button', { class: 'btn-confirm-add' }, '+');
+    var row = h('div', { class: 'inline-add-row' }, [input, confirmBtn]);
+
+    childrenEl.appendChild(row);
+    input.focus();
+
+    var commit = function() {
+      var text = input.value.trim();
+      row.remove();
+      if (text) App.actionAddTodo(text, parentId);
+    };
+
+    confirmBtn.addEventListener('click', commit);
+    input.addEventListener('keydown', function(ev) {
+      if (ev.key === 'Enter') { ev.preventDefault(); commit(); }
+      if (ev.key === 'Escape') { row.remove(); }
+    });
+    input.addEventListener('blur', function() {
+      setTimeout(function() {
+        if (document.contains(row) && input.value.trim() === '') row.remove();
+      }, 150);
+    });
+  },
+
+  // ---- 行内编辑 ----
+  renderStartEdit: function(textEl, id) {
+    if (textEl.querySelector('input')) return;
+    var currentText = textEl.textContent;
+    var input = h('input', { type: 'text', class: 'inline-input', value: currentText, maxlength: '500' });
+    textEl.textContent = '';
+    textEl.appendChild(input);
+    input.focus();
+    input.select();
+
+    var commit = function() {
+      var newText = input.value.trim();
+      if (newText && newText !== currentText) {
+        App.actionUpdateText(id, newText);
+      } else {
+        textEl.textContent = currentText;
+      }
+    };
+
+    input.addEventListener('keydown', function(ev) {
+      if (ev.key === 'Enter') { ev.preventDefault(); commit(); }
+      if (ev.key === 'Escape') { textEl.textContent = currentText; }
+    });
+    input.addEventListener('blur', commit);
+  },
+
+  // ==================== 业务操作 ====================
+
+  actionAddTodo: function(text, parentId) {
+    var item = { id: App.uid(), text: text, completed: false, children: [] };
+    if (parentId) {
+      var parent = App.treeFindById(App.state.todos, parentId);
+      if (parent) {
+        if (!parent.children) parent.children = [];
+        parent.children.push(item);
+      } else {
+        App.state.todos.push(item);
+      }
+    } else {
+      App.state.todos.push(item);
+    }
+    App.markDirty();
+    App.renderAll();
+  },
+
+  actionToggleComplete: function(id) {
+    var item = App.treeFindById(App.state.todos, id);
+    if (!item) return;
+    item.completed = !item.completed;
+    if (item.completed) {
+      App.state.collapsed[id] = true;
+    } else {
+      delete App.state.collapsed[id];
+    }
+    App.state.todos = App.treeSort(App.state.todos);
+    App.markDirty();
+    App.renderAll();
+  },
+
+  actionDeleteTodo: function(id) {
+    var item = App.treeFindById(App.state.todos, id);
+    if (!item) return;
+    App.treeRemoveById(App.state.todos, id);
+    App.state.recycleBin.push({
+      id: item.id,
+      text: item.text,
+      completed: item.completed,
+      children: item.children || [],
+      deletedAt: new Date().toISOString()
+    });
+    App.markDirty();
+    App.renderAll();
+  },
+
+  actionRestoreTodo: function(id) {
+    var idx = -1;
+    for (var i = 0; i < App.state.recycleBin.length; i++) {
+      if (App.state.recycleBin[i].id === id) { idx = i; break; }
+    }
+    if (idx < 0) return;
+    var item = App.state.recycleBin.splice(idx, 1)[0];
+    App.state.todos.push({
+      id: item.id,
+      text: item.text,
+      completed: item.completed,
+      children: item.children || []
+    });
+    App.markDirty();
+    App.renderAll();
+  },
+
+  actionPermDelete: function(id) {
+    var idx = -1;
+    for (var i = 0; i < App.state.recycleBin.length; i++) {
+      if (App.state.recycleBin[i].id === id) { idx = i; break; }
+    }
+    if (idx < 0) return;
+    App.state.recycleBin.splice(idx, 1);
+    App.markDirty();
+    App.renderAll();
+  },
+
+  actionUpdateText: function(id, text) {
+    var item = App.treeFindById(App.state.todos, id);
+    if (!item) return;
+    item.text = text;
+    App.markDirty();
+    App.renderAll();
+  },
+
+  actionToggleCollapse: function(id) {
+    if (App.state.collapsed[id]) {
+      delete App.state.collapsed[id];
+    } else {
+      App.state.collapsed[id] = true;
+    }
+    App.renderAll();
+  },
+
+  handleDeleteClick: function(id) {
+    if (App.state.deleteConfirm === id) {
+      App.state.deleteConfirm = null;
+      App.actionDeleteTodo(id);
+    } else {
+      App.state.deleteConfirm = id;
+      App.renderAll();
+      setTimeout(function() {
+        if (App.state.deleteConfirm === id) { App.state.deleteConfirm = null; App.renderAll(); }
+      }, 3000);
+    }
+  },
+
+  // ==================== 设置面板 ====================
+
+  settingsShow: function() {
+    App.dom.tokenInput.value = App.apiGetToken();
+    App.dom.tokenError.style.display = 'none';
+    document.getElementById('toggleShowCompleted').checked = App.state.showCompleted;
+    App.dom.settingsModal.classList.add('open');
+  },
+
+  settingsHide: function() {
+    App.dom.settingsModal.classList.remove('open');
+  },
+
+  settingsSaveToken: async function() {
+    var token = App.dom.tokenInput.value.trim();
+    if (!token) {
+      App.dom.tokenError.textContent = '请输入访问令牌';
+      App.dom.tokenError.style.display = 'block';
+      return;
+    }
+    App.dom.tokenError.style.display = 'none';
+    var valid = await App.apiTestToken(token);
+    if (!valid) {
+      App.dom.tokenError.textContent = '令牌验证失败，请检查后重试';
+      App.dom.tokenError.style.display = 'block';
+      return;
+    }
+    App.apiSetToken(token);
+    App.settingsHide();
+    App.toast('设置已保存', 'success');
+    App.state.loading = true;
+    App.renderAll();
+    App.dataLoad();
+  },
+
+  // ==================== 事件绑定 ====================
+
+  clickRoutes: {
+    toggle: function(id) { App.actionToggleComplete(id); },
+    collapse: function(id) { App.actionToggleCollapse(id); },
+    delete: function(id) { App.handleDeleteClick(id); },
+    addSub: function(id, e) { e.stopPropagation(); App.renderInlineAdd(id); },
+    restore: function(id) { App.actionRestoreTodo(id); },
+    permDelete: function(id) { if (confirm('确定彻底删除？此操作不可撤销。')) App.actionPermDelete(id); },
+    edit: function(id, el) { App.renderStartEdit(el, id); }
+  },
+
+  handleClick: function(e) {
+    var actionBtn = e.target.closest('[data-action]');
+    if (!actionBtn) {
+      if (App.state.deleteConfirm) { App.state.deleteConfirm = null; App.renderAll(); }
+      return;
+    }
+    var action = actionBtn.dataset.action;
+    var id = actionBtn.dataset.id;
+    var route = App.clickRoutes[action];
+    if (route) {
+      if (action === 'edit') route(id, actionBtn);
+      else if (action === 'addSub') route(id, e);
+      else route(id);
+    }
+  },
+
+  bindEvents: function() {
+    document.addEventListener('click', function(e) { App.handleClick(e); });
+
+    // 添加待办
+    App.dom.btnAdd.addEventListener('click', function() {
+      var text = App.dom.addInput.value.trim();
+      if (!text) return;
+      App.actionAddTodo(text, null);
+      App.dom.addInput.value = '';
+      App.dom.addInput.focus();
+    });
+    App.dom.addInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') App.dom.btnAdd.click();
+    });
+    App.dom.addInput.addEventListener('focus', function() {
+      setTimeout(function() {
+        App.dom.addInput.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        window.scrollBy(0, -100);
+      }, 350);
+    });
+
+    // 保存
+    App.dom.btnSave.addEventListener('click', function() { App.dataSave(); });
+
+    // 设置
+    App.dom.btnSettings.addEventListener('click', function() { App.settingsShow(); });
+    document.getElementById('btnTokenSave').addEventListener('click', function() { App.settingsSaveToken(); });
+    document.getElementById('btnTokenCancel').addEventListener('click', function() { App.settingsHide(); });
+    document.getElementById('toggleShowCompleted').addEventListener('change', function() {
+      App.state.showCompleted = this.checked;
+      localStorage.setItem('showCompleted', App.state.showCompleted ? 'true' : 'false');
+      App.renderAll();
+    });
+    App.dom.settingsModal.addEventListener('click', function(e) {
+      if (e.target === App.dom.settingsModal) App.settingsHide();
+    });
+
+    // 回收站
+    App.dom.btnBin.addEventListener('click', function() {
+      App.state.showingRecycleBin = true;
+      App.state.collapsed = {};
+      App.state.deleteConfirm = null;
+      App.renderAll();
+    });
+    App.dom.btnBack.addEventListener('click', function() {
+      App.state.showingRecycleBin = false;
+      App.renderAll();
+    });
+
+    // ---- 拖拽事件 ----
+    // 鼠标
+    document.addEventListener('mousedown', function(e) {
+      if (App.state.showingRecycleBin) return;
+      if (e.button !== 0) return;
+      if (e.target.closest('button,input,[data-action]')) return;
+      var item = e.target.closest('.todo-item');
+      if (!item) return;
+      e.preventDefault();
+      App.dnd.sx = e.clientX; App.dnd.sy = e.clientY;
+      App.dnd.timer = setTimeout(function() { App.dnd.start(item, App.dnd.sx, App.dnd.sy); }, 400);
+    });
+    document.addEventListener('mousemove', function(e) {
+      if (App.dnd.timer && !App.dnd.active) {
+        if (Math.abs(e.clientX - App.dnd.sx) > 10 || Math.abs(e.clientY - App.dnd.sy) > 10) {
+          clearTimeout(App.dnd.timer); App.dnd.timer = null;
+        }
+        return;
+      }
+      if (App.dnd.active) { App.dnd.move(e.clientX, e.clientY); e.preventDefault(); }
+    });
+    document.addEventListener('mouseup', function() { App.dnd.end(); });
+
+    // 触摸
+    document.addEventListener('touchstart', function(e) {
+      if (App.state.showingRecycleBin) return;
+      if (e.target.closest('button,input,[data-action]')) return;
+      var item = e.target.closest('.todo-item');
+      if (!item) return;
+      var t = e.touches[0];
+      App.dnd.sx = t.clientX; App.dnd.sy = t.clientY;
+      App.dnd.timer = setTimeout(function() { App.dnd.start(item, t.clientX, t.clientY); }, 500);
+    }, { passive: false });
+    document.addEventListener('touchmove', function(e) {
+      if (App.dnd.timer && !App.dnd.active) {
+        var t = e.touches[0];
+        if (Math.abs(t.clientX - App.dnd.sx) > 10 || Math.abs(t.clientY - App.dnd.sy) > 10) {
+          clearTimeout(App.dnd.timer); App.dnd.timer = null;
+        }
+        return;
+      }
+      if (App.dnd.active) { e.preventDefault(); App.dnd.move(e.touches[0].clientX, e.touches[0].clientY); }
+    }, { passive: false });
+    document.addEventListener('touchend', function() { App.dnd.end(); });
+    document.addEventListener('touchcancel', function() { App.dnd.cancel(); });
+  },
+
+  // ==================== 初始化 ====================
+
+  init: async function() {
+    App.cacheDom();
+    App.dnd = new DragDrop(App);
+    App.bindEvents();
+    var token = App.apiGetToken();
+    if (!token) {
+      App.state.loading = false;
+      App.renderAll();
+      App.settingsShow();
+    } else {
+      App.renderAll();
+      await App.dataLoad();
+    }
+  }
+};
+
+App.init();
+
+})();
+</script>
+</body>
+</html>
