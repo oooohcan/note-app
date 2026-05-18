@@ -114,14 +114,6 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
 .btn-save:active{transform:scale(.96);background:var(--primary-deeper)}
 .btn-save:disabled{background:#D1CCC4;box-shadow:none;cursor:not-allowed;transform:none;color:#A09890}
 
-/* Back bar */
-.back-bar{margin-bottom:16px}
-.btn-back{
-  padding:10px 0;border:none;background:none;cursor:pointer;font-size:14px;
-  color:var(--primary);font-weight:600;transition:all .15s ease;font-family:var(--font-body);
-  display:inline-flex;align-items:center;gap:4px;
-}
-.btn-back:active{opacity:.6;transform:translateX(-2px)}
 
 /* ---- 3. Todo List ---- */
 .todo-list,.recycle-list{display:flex;flex-direction:column;gap:8px}
@@ -129,14 +121,13 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
   background:var(--card);border-radius:var(--radius);
   border:var(--card-border);box-shadow:var(--shadow);
   transition:all .25s cubic-bezier(.4,0,.2,1);overflow:hidden;
-  user-select:none;-webkit-user-select:none;
   animation:card-in .35s ease both;
 }
 @keyframes card-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .todo-item:active{transform:scale(.985)}
-.todo-row{display:flex;align-items:center;gap:10px;padding:14px 16px}
+.todo-row{display:flex;align-items:center;gap:10px;padding:10px 14px}
 .children{
-  margin-left:20px;padding:0 14px 10px 14px;display:flex;flex-direction:column;gap:6px;
+  margin-left:20px;padding:0 10px 4px 14px;display:flex;flex-direction:column;gap:4px;
   border-left:1.5px dashed var(--border);
 }
 .children .children .children .children .children{margin-left:10px;padding:0 8px 4px 10px}
@@ -173,6 +164,7 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
   flex:1;font-size:15px;line-height:1.45;word-break:break-word;color:var(--text);
   overflow:hidden;min-width:0;cursor:text;padding:1px 0;
   transition:color .3s ease;
+  user-select:text;-webkit-user-select:text;-webkit-touch-callout:default;
 }
 .todo-actions{display:flex;gap:4px;flex-shrink:0;margin-left:auto;opacity:0;transition:opacity .2s ease}
 
@@ -225,7 +217,7 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
   box-shadow:0 0 0 4px rgba(194,101,74,.06);
 }
 .inline-add-row{
-  display:flex;align-items:center;gap:8px;padding:8px 16px 14px;
+  display:flex;align-items:center;gap:8px;padding:6px 10px 8px;
   animation:slide-down .2s ease both;
 }
 @keyframes slide-down{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
@@ -243,11 +235,11 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
 .inline-add-row .btn-confirm-add:active{transform:scale(.9);background:var(--primary-deeper)}
 
 /* ---- 5. Recycle Bin ---- */
-.recycle-list{display:flex;flex-direction:column;gap:10px}
+.recycle-list{display:flex;flex-direction:column;gap:18px}
 .bin-item{
   background:var(--card);border-radius:var(--radius);
   border:var(--card-border);box-shadow:var(--shadow);
-  padding:16px 18px;display:flex;align-items:center;gap:12px;
+  padding:8px 14px;display:flex;align-items:center;gap:12px;
   transition:all .2s ease;border-left:4px solid var(--primary);
   animation:card-in .35s ease both;
 }
@@ -309,10 +301,12 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
   color:var(--primary);font-size:12px;display:inline-block;margin-bottom:12px;
   text-decoration:none;border-bottom:1px dotted var(--primary);
 }
+.modal h2 a{display:inline;margin-bottom:0;font-size:12px;font-weight:400;font-style:normal;font-family:var(--font-body);letter-spacing:0}
+.field-label a{font-size:12px;font-weight:400;margin-left:4px;border-bottom:1px dotted var(--primary);text-decoration:none;color:var(--primary)}
 .modal a:hover{opacity:.8}
 
 /* Toggle switch */
-.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;margin:4px 0 8px;border-top:1px solid var(--border)}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:20px 0 8px;margin:4px 0 8px;border-top:1px solid var(--border)}
 .toggle-row span{font-size:14px;color:var(--text);font-weight:500}
 .toggle-switch{position:relative;width:48px;height:28px;flex-shrink:0}
 .toggle-switch input{opacity:0;width:0;height:0}
@@ -400,10 +394,10 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
   .add-bar{margin:4px 0 28px}
   .add-bar input{padding:14px 18px;font-size:16px}
   .add-bar .btn-add-top{padding:14px 24px;font-size:15px}
-  .todo-row{padding:16px 20px;gap:12px}
+  .todo-row{padding:12px 18px;gap:12px}
   .todo-row:hover{background:rgba(194,101,74,.015)}
   .todo-row:hover .todo-actions{opacity:1}
-  .children{margin-left:28px;padding:0 16px 12px 16px}
+  .children{margin-left:28px;padding:0 12px 6px 16px}
   .todo-item:hover{
     box-shadow:var(--shadow-hover);transform:translateY(-1px);
   }
@@ -434,15 +428,15 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
   .save-status{font-size:9px}
   .add-bar input{padding:11px 14px;font-size:16px}
   .add-bar .btn-add-top{padding:11px 16px;font-size:13px}
-  .todo-row{padding:12px 14px;gap:8px}
+  .todo-row{padding:10px 12px;gap:8px}
   .todo-actions{opacity:1}
-  .children{margin-left:16px;padding:0 10px 8px 10px}
+  .children{margin-left:16px;padding:0 8px 4px 10px}
   .btn-check{width:22px;height:22px}
   .btn-sub,.btn-del{width:34px;height:34px;font-size:16px}
   .todo-text{font-size:14px}
   .save-bar{padding:12px 16px;padding-bottom:max(12px,env(safe-area-inset-bottom,12px))}
   .btn-save{padding:11px 32px;font-size:13px}
-  .bin-item{padding:14px 16px;flex-wrap:wrap}
+  .bin-item{padding:8px 14px;flex-wrap:wrap}
   .bin-actions{margin-left:auto}
   .empty-state{padding:56px 16px}
   .empty-state p{font-size:14px}
@@ -470,7 +464,6 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
 
   <div class="todo-list" id="todoList"></div>
   <div class="recycle-list" id="recycleList" style="display:none">
-    <div class="back-bar"><button class="btn-back" id="btnBack">&lsaquo; 返回</button></div>
     <div id="recycleItems"></div>
   </div>
 </div>
@@ -484,9 +477,8 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
 <div class="modal-overlay" id="settingsModal">
   <div class="modal">
     <h2>设置</h2>
-    <label class="field-label">Gitee 访问令牌</label>
+    <label class="field-label">Gitee 访问令牌 <a href="https://gitee.com/profile/personal_access_tokens" target="_blank" class="token-link">去创建 &rarr;</a></label>
     <input type="password" id="tokenInput" placeholder="粘贴令牌...">
-    <a href="https://gitee.com/profile/personal_access_tokens" target="_blank">前往 Gitee 创建令牌 &rarr;</a>
     <div class="err-msg" id="tokenError"></div>
     <div class="toggle-row">
       <span>显示已完成待办</span>
@@ -628,6 +620,7 @@ var App = {
     collapsed: {},
     showCompleted: localStorage.getItem('showCompleted') === 'true',
     deleteConfirm: null,
+    deleteConfirmTimeout: null,
     dirty: false,
     syncing: false,
     loading: true
@@ -640,7 +633,7 @@ var App = {
 
   cacheDom: function() {
     var ids = ['todoList','recycleList','recycleItems','addBar','addInput',
-               'btnAdd','btnBin','btnBack','saveStatus','btnSave','btnSettings',
+               'btnAdd','btnBin','saveStatus','btnSave','btnSettings',
                'settingsModal','tokenInput','tokenError','toastContainer'];
     for (var i = 0; i < ids.length; i++) {
       App.dom[ids[i]] = document.getElementById(ids[i]);
@@ -826,13 +819,6 @@ var App = {
     return -1;
   },
 
-  treeFilter: function(list) {
-    if (App.state.showCompleted) return list;
-    return list.filter(function(item) { return !item.completed; }).map(function(item) {
-      return { id: item.id, text: item.text, completed: item.completed, children: App.treeFilter(item.children || []) };
-    });
-  },
-
   treeSort: function(list) {
     var active = list.filter(function(i) { return !i.completed; });
     var done = list.filter(function(i) { return i.completed; });
@@ -900,8 +886,87 @@ var App = {
       var insertIdx = position === 'before' ? tgtIdx : tgtIdx + 1;
       targetParent.splice(insertIdx, 0, src);
     }
+
+    // Targeted DOM updates
+    var srcEl = App.findItemEl(sourceId);
+    var tgtEl = App.findItemEl(targetId);
+    if (!srcEl || !tgtEl) {
+      App.renderTodoList();
+      App.markDirty();
+      return;
+    }
+
+    // Track old parent for collapse button update
+    var oldParentId = null;
+    var srcParentEl = srcEl.parentElement;
+    if (srcParentEl && srcParentEl !== App.dom.todoList) {
+      var oldParentItem = srcParentEl.closest('.todo-item');
+      if (oldParentItem) oldParentId = oldParentItem.dataset.id;
+    }
+
+    // Remove source from DOM
+    srcEl.remove();
+
+    // Insert at new position
+    var targetContainer;
+    if (position === 'child') {
+      targetContainer = tgtEl.querySelector(':scope > .children');
+      if (!targetContainer) {
+        targetContainer = h('div', { class: 'children' });
+        var targetRow = tgtEl.querySelector(':scope > .todo-row');
+        if (targetRow && targetRow.nextSibling) {
+          tgtEl.insertBefore(targetContainer, targetRow.nextSibling);
+        } else {
+          tgtEl.appendChild(targetContainer);
+        }
+      }
+      targetContainer.appendChild(srcEl);
+    } else if (position === 'before') {
+      targetContainer = tgtEl.parentElement;
+      targetContainer.insertBefore(srcEl, tgtEl);
+    } else {
+      targetContainer = tgtEl.parentElement;
+      if (tgtEl.nextSibling) {
+        targetContainer.insertBefore(srcEl, tgtEl.nextSibling);
+      } else {
+        targetContainer.appendChild(srcEl);
+      }
+    }
+
+    // Update addSub button if level changed
+    var newLevel = App.getItemLevel(srcEl);
+    var subBtn = srcEl.querySelector(':scope > .todo-row .btn-sub');
+    if (newLevel < 5 && !subBtn) {
+      var actionsEl = srcEl.querySelector(':scope > .todo-row > .todo-actions');
+      if (actionsEl) {
+        var newSubBtn = h('button', { class: 'btn-sub', data: { action: 'addSub', id: sourceId }, title: '添加子任务' }, '+');
+        actionsEl.insertBefore(newSubBtn, actionsEl.firstChild);
+      }
+    } else if (newLevel >= 5 && subBtn) {
+      subBtn.remove();
+    }
+
+    // Update collapse buttons on old parent and target
+    if (oldParentId) {
+      App.updateCollapseBtn(oldParentId);
+      var oldParentEl = App.findItemEl(oldParentId);
+      if (oldParentEl) {
+        var oldChildrenContainer = oldParentEl.querySelector(':scope > .children');
+        var oldParentItem = App.treeFindById(App.state.todos, oldParentId);
+        if ((!oldChildrenContainer || oldChildrenContainer.querySelectorAll(':scope > .todo-item').length === 0) && oldParentItem && (!oldParentItem.children || !oldParentItem.children.length)) {
+          var oldChildren = oldParentEl.querySelector(':scope > .children');
+          if (oldChildren) oldChildren.remove();
+          var oldHint = oldParentEl.querySelector(':scope > .collapsed-hint');
+          if (oldHint) oldHint.remove();
+          App.updateCollapseBtn(oldParentId);
+        }
+      }
+    }
+    if (position === 'child') {
+      App.updateCollapseBtn(targetId);
+    }
+
     App.markDirty();
-    App.renderAll();
   },
 
   // ==================== 数据持久化 ====================
@@ -977,6 +1042,151 @@ var App = {
 
   // ==================== 渲染引擎 ====================
 
+  // ---- DOM 辅助函数 ----
+
+  findItemEl: function(id) {
+    return document.querySelector('.todo-item[data-id="' + id + '"]');
+  },
+
+  getItemLevel: function(el) {
+    var level = 0;
+    var p = el.parentElement;
+    while (p && !p.classList.contains('todo-list')) {
+      if (p.classList.contains('children')) level++;
+      p = p.parentElement;
+    }
+    return level;
+  },
+
+  insertIntoSortedContainer: function(container, el, isCompleted) {
+    if (isCompleted) {
+      container.appendChild(el);
+    } else {
+      var firstCompleted = container.querySelector(':scope > .todo-item.completed');
+      if (firstCompleted) {
+        container.insertBefore(el, firstCompleted);
+      } else {
+        container.appendChild(el);
+      }
+    }
+  },
+
+  updateCollapseBtn: function(id) {
+    var el = this.findItemEl(id);
+    if (!el) return;
+    var item = App.treeFindById(App.state.todos, id);
+    if (!item) return;
+    var hasChildren = item.children && item.children.length > 0;
+    var isCollapsed = !!App.state.collapsed[id];
+    var collapseBtn = el.querySelector(':scope > .todo-row > .btn-collapse');
+    if (!collapseBtn) return;
+    if (hasChildren) {
+      if (collapseBtn.tagName === 'SPAN') {
+        var newBtn = h('button', {
+          class: 'btn-collapse',
+          data: { action: 'collapse', id: id },
+          html: isCollapsed ? '&#9654;' : '&#9660;'
+        });
+        collapseBtn.replaceWith(newBtn);
+      } else {
+        collapseBtn.innerHTML = isCollapsed ? '&#9654;' : '&#9660;';
+      }
+    } else {
+      if (collapseBtn.tagName === 'BUTTON') {
+        var placeholder = h('span', { class: 'btn-collapse', style: 'visibility:hidden' });
+        collapseBtn.replaceWith(placeholder);
+      }
+    }
+  },
+
+  renderAndInsertItem: function(item, parentId, level) {
+    level = level || 0;
+    var el = App.renderTodoItem(item, level);
+    var container;
+    if (parentId) {
+      var parentEl = App.findItemEl(parentId);
+      if (!parentEl) return el;
+      container = parentEl.querySelector(':scope > .children');
+      if (!container) {
+        container = h('div', { class: 'children' });
+        var todoRow = parentEl.querySelector(':scope > .todo-row');
+        if (todoRow && todoRow.nextSibling) {
+          parentEl.insertBefore(container, todoRow.nextSibling);
+        } else {
+          parentEl.appendChild(container);
+        }
+      }
+    } else {
+      container = App.dom.todoList;
+      var emptyState = container.querySelector(':scope > .empty-state');
+      if (emptyState) emptyState.remove();
+    }
+    App.insertIntoSortedContainer(container, el, item.completed);
+    if (item.completed && !App.state.showCompleted) {
+      el.style.display = 'none';
+    }
+    if (parentId) {
+      App.updateCollapseBtn(parentId);
+    }
+    return el;
+  },
+
+  renderBinItem: function(item) {
+    return h('div', { class: 'bin-item', data: { id: item.id } }, [
+      h('span', { class: 'bin-text' }, item.text),
+      h('span', { class: 'bin-date' }, App.fmtDate(item.deletedAt)),
+      h('div', { class: 'bin-actions' }, [
+        h('button', { class: 'btn-restore', data: { action: 'restore', id: item.id } }, '↩ 恢复'),
+        h('button', { class: 'btn-permadel', data: { action: 'permDelete', id: item.id } }, '✕ 彻底删除')
+      ])
+    ]);
+  },
+
+  updateEmptyState: function(container, emptyHtml) {
+    var existing = container.querySelector(':scope > .empty-state');
+    var hasItems = container.querySelectorAll(':scope > .todo-item, :scope > .bin-item').length > 0;
+    if (!hasItems && !existing) {
+      container.appendChild(h('div', { class: 'empty-state' }, emptyHtml));
+    } else if (hasItems && existing) {
+      existing.remove();
+    }
+  },
+
+  revertDeleteConfirm: function(id) {
+    if (App.state.deleteConfirmTimeout) {
+      clearTimeout(App.state.deleteConfirmTimeout);
+      App.state.deleteConfirmTimeout = null;
+    }
+    if (App.state.deleteConfirm === id) {
+      App.state.deleteConfirm = null;
+    }
+    var btn = document.querySelector('.btn-del.confirm[data-id="' + id + '"]');
+    if (btn) {
+      btn.classList.remove('confirm');
+      btn.innerHTML = '&times;';
+    }
+  },
+
+  updateViewVisibility: function() {
+    if (App.state.showingRecycleBin) {
+      App.dom.todoList.style.display = 'none';
+      App.dom.recycleList.style.display = '';
+      App.dom.addBar.style.display = 'none';
+    } else {
+      App.dom.todoList.style.display = '';
+      App.dom.recycleList.style.display = 'none';
+      App.dom.addBar.style.display = '';
+    }
+  },
+
+  prependBinItem: function(item) {
+    var container = App.dom.recycleItems;
+    var emptyState = container.querySelector(':scope > .empty-state');
+    if (emptyState) emptyState.remove();
+    var el = App.renderBinItem(item);
+    container.insertBefore(el, container.firstChild);
+  },
+
   renderCheckbox: function(item) {
     return h('button', { class: 'btn-check' + (item.completed ? ' checked' : ''), data: { action: 'toggle', id: item.id } });
   },
@@ -1027,22 +1237,24 @@ var App = {
 
   renderTodoList: function() {
     var list = App.dom.todoList;
+    var savedScrollY = window.scrollY;
     list.innerHTML = '';
 
     if (App.state.loading) {
       list.appendChild(h('div', { class: 'loading' }, [h('div', { class: 'spinner' }), h('p', null, '加载中...')]));
-      return;
-    }
-
-    if (App.state.todos.length === 0) {
+    } else if (App.state.todos.length === 0) {
       list.appendChild(h('div', { class: 'empty-state' }, h('p', { html: '还没有待办事项<br>在上方输入框添加第一个任务吧' })));
-      return;
+    } else {
+      for (var i = 0; i < App.state.todos.length; i++) {
+        list.appendChild(App.renderTodoItem(App.state.todos[i], 0));
+      }
+      // Hide completed items if showCompleted is off
+      if (!App.state.showCompleted) {
+        var completedItems = list.querySelectorAll('.todo-item.completed');
+        completedItems.forEach(function(el) { el.style.display = 'none'; });
+      }
     }
-
-    var visible = App.treeFilter(App.state.todos);
-    for (var i = 0; i < visible.length; i++) {
-      list.appendChild(App.renderTodoItem(visible[i], 0));
-    }
+    window.scrollTo(0, savedScrollY);
   },
 
   renderRecycleBin: function() {
@@ -1069,18 +1281,11 @@ var App = {
     }
   },
 
+  // 全量渲染 — 仅用于初始加载和 token 更换时
   renderAll: function() {
     App.renderTodoList();
     App.renderRecycleBin();
-    if (App.state.showingRecycleBin) {
-      App.dom.todoList.style.display = 'none';
-      App.dom.recycleList.style.display = '';
-      App.dom.addBar.style.display = 'none';
-    } else {
-      App.dom.todoList.style.display = '';
-      App.dom.recycleList.style.display = 'none';
-      App.dom.addBar.style.display = '';
-    }
+    App.updateViewVisibility();
   },
 
   // ---- 行内添加子任务 ----
@@ -1098,8 +1303,7 @@ var App = {
     }
 
     var input = h('input', { type: 'text', placeholder: '输入子任务...', maxlength: '500' });
-    var confirmBtn = h('button', { class: 'btn-confirm-add' }, '+');
-    var row = h('div', { class: 'inline-add-row' }, [input, confirmBtn]);
+    var row = h('div', { class: 'inline-add-row' }, [input]);
 
     childrenEl.appendChild(row);
     input.focus();
@@ -1110,16 +1314,11 @@ var App = {
       if (text) App.actionAddTodo(text, parentId);
     };
 
-    confirmBtn.addEventListener('click', commit);
     input.addEventListener('keydown', function(ev) {
       if (ev.key === 'Enter') { ev.preventDefault(); commit(); }
       if (ev.key === 'Escape') { row.remove(); }
     });
-    input.addEventListener('blur', function() {
-      setTimeout(function() {
-        if (document.contains(row) && input.value.trim() === '') row.remove();
-      }, 150);
-    });
+    input.addEventListener('blur', commit);
   },
 
   // ---- 行内编辑 ----
@@ -1152,33 +1351,121 @@ var App = {
 
   actionAddTodo: function(text, parentId) {
     var item = { id: App.uid(), text: text, completed: false, children: [] };
+    var level = 0;
+    var parentItem = null;
+
     if (parentId) {
-      var parent = App.treeFindById(App.state.todos, parentId);
-      if (parent) {
-        if (!parent.children) parent.children = [];
-        parent.children.push(item);
+      parentItem = App.treeFindById(App.state.todos, parentId);
+      if (parentItem) {
+        if (!parentItem.children) parentItem.children = [];
+        parentItem.children.push(item);
+        level = App.treeGetDepth(App.state.todos, parentId) + 1;
       } else {
         App.state.todos.push(item);
       }
     } else {
       App.state.todos.push(item);
     }
+
+    // If parent is collapsed, just update the hint count
+    if (parentItem && App.state.collapsed[parentId]) {
+      var parentEl = App.findItemEl(parentId);
+      if (parentEl) {
+        var tempChildren = parentEl.querySelector(':scope > .children');
+        if (tempChildren) tempChildren.remove();
+        var hint = parentEl.querySelector(':scope > .collapsed-hint');
+        if (hint) {
+          hint.textContent = parentItem.children.length + ' 项已折叠';
+        } else {
+          parentEl.appendChild(h('div', { class: 'collapsed-hint' }, parentItem.children.length + ' 项已折叠'));
+        }
+      }
+    } else {
+      App.renderAndInsertItem(item, parentId, level);
+    }
+
     App.markDirty();
-    App.renderAll();
   },
 
   actionToggleComplete: function(id) {
     var item = App.treeFindById(App.state.todos, id);
     if (!item) return;
     item.completed = !item.completed;
+
+    // Manage collapse state
     if (item.completed) {
       App.state.collapsed[id] = true;
     } else {
       delete App.state.collapsed[id];
     }
-    App.state.todos = App.treeSort(App.state.todos);
+
+    // Re-sort data — find parent array and move item to correct position
+    var parentArray = App.treeFindParent(App.state.todos, id);
+    if (!parentArray) parentArray = App.state.todos;
+    var dataIdx = -1;
+    for (var i = 0; i < parentArray.length; i++) {
+      if (parentArray[i].id === id) { dataIdx = i; break; }
+    }
+    if (dataIdx >= 0) {
+      parentArray.splice(dataIdx, 1);
+      var insertIdx = 0;
+      while (insertIdx < parentArray.length && !parentArray[insertIdx].completed) insertIdx++;
+      parentArray.splice(insertIdx, 0, item);
+    }
+
+    // Targeted DOM updates
+    var el = App.findItemEl(id);
+    if (!el) { App.markDirty(); return; }
+
+    // 1. Toggle classes
+    el.classList.toggle('completed', item.completed);
+    var checkbox = el.querySelector(':scope > .todo-row > .btn-check');
+    if (checkbox) checkbox.classList.toggle('checked', item.completed);
+
+    // 2. Rebuild children section
+    var existingChildren = el.querySelector(':scope > .children');
+    var existingHint = el.querySelector(':scope > .collapsed-hint');
+    if (existingChildren) existingChildren.remove();
+    if (existingHint) existingHint.remove();
+
+    var hasChildren = item.children && item.children.length;
+    if (hasChildren) {
+      var parentLevel = App.getItemLevel(el);
+      var childLevel = parentLevel + 1;
+      if (App.state.collapsed[id]) {
+        el.appendChild(h('div', { class: 'collapsed-hint' }, item.children.length + ' 项已折叠'));
+      } else {
+        var childContainer = h('div', { class: 'children' });
+        for (var ci = 0; ci < item.children.length; ci++) {
+          childContainer.appendChild(App.renderTodoItem(item.children[ci], childLevel));
+        }
+        el.appendChild(childContainer);
+      }
+    }
+
+    // 3. Move DOM element to correct sorted position
+    var container = el.parentElement;
+    if (container) {
+      if (item.completed) {
+        container.appendChild(el);
+      } else {
+        var firstCompleted = container.querySelector(':scope > .todo-item.completed');
+        if (firstCompleted && firstCompleted !== el) {
+          container.insertBefore(el, firstCompleted);
+        } else if (el.nextSibling && el.nextSibling.classList && el.nextSibling.classList.contains('completed')) {
+          // Already before completed items, no move needed
+        }
+      }
+    }
+
+    // 4. Handle visibility
+    if (!App.state.showCompleted && item.completed) {
+      el.style.display = 'none';
+    } else {
+      el.style.display = '';
+    }
+
     App.markDirty();
-    App.renderAll();
   },
 
   actionDeleteTodo: function(id) {
@@ -1192,8 +1479,38 @@ var App = {
       children: item.children || [],
       deletedAt: new Date().toISOString()
     });
+
+    // Remove from DOM
+    var el = App.findItemEl(id);
+    var parentItemId = null;
+    if (el) {
+      var parentEl = el.parentElement;
+      if (parentEl && parentEl !== App.dom.todoList) {
+        var parentTodoItem = parentEl.closest('.todo-item');
+        if (parentTodoItem) parentItemId = parentTodoItem.dataset.id;
+      }
+      el.remove();
+      if (parentItemId) {
+        App.updateCollapseBtn(parentItemId);
+        // Remove empty .children container if parent now has no children
+        var parentEl2 = App.findItemEl(parentItemId);
+        if (parentEl2) {
+          var parentItem = App.treeFindById(App.state.todos, parentItemId);
+          if (parentItem && (!parentItem.children || !parentItem.children.length)) {
+            var emptyChildren = parentEl2.querySelector(':scope > .children');
+            if (emptyChildren) emptyChildren.remove();
+            var oldHint = parentEl2.querySelector(':scope > .collapsed-hint');
+            if (oldHint) oldHint.remove();
+          }
+        }
+      }
+      App.updateEmptyState(App.dom.todoList, h('p', { html: '还没有待办事项<br>在上方输入框添加第一个任务吧' }));
+    }
+
+    // Add to recycle bin DOM
+    App.prependBinItem(App.state.recycleBin[App.state.recycleBin.length - 1]);
+
     App.markDirty();
-    App.renderAll();
   },
 
   actionRestoreTodo: function(id) {
@@ -1203,14 +1520,23 @@ var App = {
     }
     if (idx < 0) return;
     var item = App.state.recycleBin.splice(idx, 1)[0];
-    App.state.todos.push({
+    var todo = {
       id: item.id,
       text: item.text,
       completed: item.completed,
       children: item.children || []
-    });
+    };
+    App.state.todos.push(todo);
+
+    // Remove from recycle bin DOM
+    var binEl = document.querySelector('.bin-item[data-id="' + id + '"]');
+    if (binEl) binEl.remove();
+    App.updateEmptyState(App.dom.recycleItems, h('p', null, '回收站为空'));
+
+    // Insert into todo list DOM
+    App.renderAndInsertItem(todo, null, 0);
+
     App.markDirty();
-    App.renderAll();
   },
 
   actionPermDelete: function(id) {
@@ -1220,36 +1546,85 @@ var App = {
     }
     if (idx < 0) return;
     App.state.recycleBin.splice(idx, 1);
+
+    var binEl = document.querySelector('.bin-item[data-id="' + id + '"]');
+    if (binEl) binEl.remove();
+    App.updateEmptyState(App.dom.recycleItems, h('p', null, '回收站为空'));
+
     App.markDirty();
-    App.renderAll();
   },
 
   actionUpdateText: function(id, text) {
     var item = App.treeFindById(App.state.todos, id);
     if (!item) return;
     item.text = text;
+    var textEl = document.querySelector('.todo-item[data-id="' + id + '"] .todo-text');
+    if (textEl) textEl.textContent = text;
     App.markDirty();
-    App.renderAll();
   },
 
   actionToggleCollapse: function(id) {
-    if (App.state.collapsed[id]) {
+    var wasCollapsed = !!App.state.collapsed[id];
+    if (wasCollapsed) {
       delete App.state.collapsed[id];
     } else {
       App.state.collapsed[id] = true;
     }
-    App.renderAll();
+
+    var el = App.findItemEl(id);
+    if (!el) return;
+    var item = App.treeFindById(App.state.todos, id);
+    if (!item) return;
+    var hasChildren = item.children && item.children.length > 0;
+    if (!hasChildren) return;
+
+    var parentLevel = App.getItemLevel(el);
+    var childLevel = parentLevel + 1;
+
+    // Remove existing children or hint
+    var existingChildren = el.querySelector(':scope > .children');
+    var existingHint = el.querySelector(':scope > .collapsed-hint');
+    if (existingChildren) existingChildren.remove();
+    if (existingHint) existingHint.remove();
+
+    if (wasCollapsed) {
+      // Expanding — rebuild children
+      var childrenContainer = h('div', { class: 'children' });
+      for (var i = 0; i < item.children.length; i++) {
+        childrenContainer.appendChild(App.renderTodoItem(item.children[i], childLevel));
+      }
+      el.appendChild(childrenContainer);
+    } else {
+      // Collapsing — show hint
+      el.appendChild(h('div', { class: 'collapsed-hint' }, item.children.length + ' 项已折叠'));
+    }
+
+    // Update button arrow
+    App.updateCollapseBtn(id);
   },
 
   handleDeleteClick: function(id) {
     if (App.state.deleteConfirm === id) {
+      if (App.state.deleteConfirmTimeout) {
+        clearTimeout(App.state.deleteConfirmTimeout);
+        App.state.deleteConfirmTimeout = null;
+      }
       App.state.deleteConfirm = null;
       App.actionDeleteTodo(id);
     } else {
+      if (App.state.deleteConfirm !== null) {
+        App.revertDeleteConfirm(App.state.deleteConfirm);
+      }
       App.state.deleteConfirm = id;
-      App.renderAll();
-      setTimeout(function() {
-        if (App.state.deleteConfirm === id) { App.state.deleteConfirm = null; App.renderAll(); }
+      var btn = document.querySelector('.btn-del[data-id="' + id + '"]');
+      if (btn) {
+        btn.classList.add('confirm');
+        btn.innerHTML = '删除';
+      }
+      App.state.deleteConfirmTimeout = setTimeout(function() {
+        if (App.state.deleteConfirm === id) {
+          App.revertDeleteConfirm(id);
+        }
       }, 3000);
     }
   },
@@ -1268,7 +1643,7 @@ var App = {
   },
 
   setupVersion: function() {
-    var ver = '1.1.0';
+    var ver = '1.1.1';
     var date = '2026-05-18';
     var el = document.getElementById('versionInfo');
     if (el) el.textContent = 'v' + ver + ' / ' + date;
@@ -1325,7 +1700,9 @@ var App = {
   handleClick: function(e) {
     var actionBtn = e.target.closest('[data-action]');
     if (!actionBtn) {
-      if (App.state.deleteConfirm) { App.state.deleteConfirm = null; App.renderAll(); }
+      if (App.state.deleteConfirm !== null) {
+        App.revertDeleteConfirm(App.state.deleteConfirm);
+      }
       return;
     }
     var action = actionBtn.dataset.action;
@@ -1368,7 +1745,10 @@ var App = {
     document.getElementById('toggleShowCompleted').addEventListener('change', function() {
       App.state.showCompleted = this.checked;
       localStorage.setItem('showCompleted', App.state.showCompleted ? 'true' : 'false');
-      App.renderAll();
+      var completedItems = App.dom.todoList.querySelectorAll('.todo-item.completed');
+      completedItems.forEach(function(el) {
+        el.style.display = App.state.showCompleted ? '' : 'none';
+      });
     });
     App.dom.settingsModal.addEventListener('click', function(e) {
       if (e.target === App.dom.settingsModal) App.settingsHide();
@@ -1387,14 +1767,16 @@ var App = {
 
     // 回收站
     App.dom.btnBin.addEventListener('click', function() {
-      App.state.showingRecycleBin = true;
-      App.state.collapsed = {};
-      App.state.deleteConfirm = null;
-      App.renderAll();
-    });
-    App.dom.btnBack.addEventListener('click', function() {
-      App.state.showingRecycleBin = false;
-      App.renderAll();
+      if (App.state.showingRecycleBin) {
+        App.state.showingRecycleBin = false;
+      } else {
+        App.state.showingRecycleBin = true;
+        if (App.state.deleteConfirm !== null) {
+          App.revertDeleteConfirm(App.state.deleteConfirm);
+        }
+      }
+      App.dom.btnBin.textContent = App.state.showingRecycleBin ? '返回' : '回收站';
+      App.updateViewVisibility();
     });
 
     // ---- 拖拽事件 ----
