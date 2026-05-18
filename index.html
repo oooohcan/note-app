@@ -287,6 +287,11 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
 }
 .modal input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(194,101,74,.07)}
 .modal .btn-row{display:flex;gap:10px;justify-content:flex-end;margin-top:4px}
+.version-info{
+  text-align:center;padding:12px 0 0;margin-top:14px;
+  border-top:1px solid var(--border);font-size:11px;color:var(--text-secondary);
+  letter-spacing:0.02em;
+}
 .modal .btn-row button{
   padding:10px 22px;border-radius:20px;font-size:13px;font-weight:600;
   cursor:pointer;border:none;transition:all .15s ease;font-family:var(--font-body);
@@ -483,6 +488,7 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
       <span>显示已完成待办</span>
       <label class="toggle-switch"><input type="checkbox" id="toggleShowCompleted"><span class="toggle-slider"></span></label>
     </div>
+    <div class="version-info" id="versionInfo"></div>
     <div class="btn-row">
       <button class="btn-cancel" id="btnTokenCancel">取消</button>
       <button class="btn-confirm" id="btnTokenSave">保存</button>
@@ -1246,6 +1252,13 @@ var App = {
     App.dom.settingsModal.classList.remove('open');
   },
 
+  setupVersion: function() {
+    var ver = '1.1.0';
+    var date = '2026-05-18';
+    var el = document.getElementById('versionInfo');
+    if (el) el.textContent = 'v' + ver + ' / ' + date;
+  },
+
   settingsSaveToken: async function() {
     var token = App.dom.tokenInput.value.trim();
     if (!token) {
@@ -1396,6 +1409,7 @@ var App = {
 
   init: async function() {
     App.cacheDom();
+    App.setupVersion();
     App.dnd = new DragDrop(App);
     App.bindEvents();
     var token = App.apiGetToken();
