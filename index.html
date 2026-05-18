@@ -3,309 +3,436 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#4B7BFF">
+<meta name="theme-color" content="#C2654A">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="待办清单">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxODAgMTgwIj48cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgcng9IjM2IiBmaWxsPSIjNEE5MEQ5Ii8+PHBhdGggZD0iTTgwIDEyMGwtMjYtMjYgOC04IDE4IDE4IDM4LTM4IDggOHoiIGZpbGw9IiNmZmYiLz48L3N2Zz4=">
+<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxODAgMTgwIj48cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgcng9IjM2IiBmaWxsPSIjQzI2NTRBIi8+PHBhdGggZD0iTTgwIDEyMGwtMjYtMjYgOC04IDE4IDE4IDM4LTM4IDggOHoiIGZpbGw9IiNmZmYiLz48L3N2Zz4=">
 <link rel="manifest" href="./manifest.json">
 <title>待办清单</title>
 <style>
 /* ================================================================
-   1. 变量与重置
+   WARM EDITORIAL — Mediterranean Stationery
    ================================================================ */
+
+/* ---- 1. Variables & Reset ---- */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#F5F5F7;--card:#FDFDFD;--primary:#4B7BFF;--primary-dark:#6C5CE7;
-  --text:#1C1C1E;--text-secondary:#8E8E93;--text-done:#B0B0B8;
-  --border:#E5E5EA;--hover:#F2F2F7;--danger:#D95050;--danger-hover:#C04040;
-  --amber:#C08A30;--amber-bg:#FDF8F0;--shadow:0 1px 3px rgba(0,0,0,.06);
-  --card-border:1px solid #DADAE0;
-  --radius:10px;--radius-sm:8px;--radius-xs:6px;
-  --font:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
-  --gradient:linear-gradient(135deg,#4B7BFF,#6C5CE7);
+  --bg:#FBF7F0;--card:#FFFDF8;--primary:#C2654A;--primary-deeper:#A84E34;
+  --text:#2D2A24;--text-secondary:#8B8680;--text-done:#B5AFA6;
+  --border:#E8E3DA;--hover-bg:#F5F0E6;--danger:#C44D4D;--danger-hover:#A83A3A;
+  --amber:#B8860B;--amber-bg:#FDF8F0;--completed-tint:#F2F6F0;
+  --shadow:0 1px 2px rgba(45,42,36,.04),0 2px 8px rgba(45,42,36,.04);
+  --shadow-hover:0 1px 2px rgba(45,42,36,.05),0 4px 16px rgba(45,42,36,.07);
+  --shadow-modal:0 16px 48px rgba(45,42,36,.12);
+  --card-border:1px solid #E8E3DA;
+  --radius:12px;--radius-sm:10px;--radius-xs:8px;
+  --font-heading:Georgia,'Times New Roman','Noto Serif SC',serif;
+  --font-body:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
 }
+html{background:var(--bg)}
 body{
-  font-family:var(--font);background:var(--bg);color:var(--text);
-  min-height:100vh;min-height:100dvh;line-height:1.5;
+  font-family:var(--font-body);background:var(--bg);color:var(--text);
+  min-height:100vh;min-height:100dvh;line-height:1.55;
   -webkit-tap-highlight-color:transparent;
-  -webkit-font-smoothing:antialiased;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  background-image:
+    radial-gradient(ellipse at 20% 10%, rgba(194,101,74,.03) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 60%, rgba(143,168,138,.03) 0%, transparent 50%),
+    repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(45,42,36,.004) 2px, rgba(45,42,36,.004) 4px);
 }
 
-/* ================================================================
-   2. 布局
-   ================================================================ */
-.app{max-width:600px;margin:0 auto;padding:0 16px 100px}
+/* ---- 2. Layout ---- */
+.app{max-width:600px;margin:0 auto;padding:0 16px 120px}
 
-/* 顶栏 */
+/* Header */
 .header{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:max(24px,env(safe-area-inset-top,0px)) 0 12px;position:sticky;top:0;z-index:10;
-  background:var(--bg);backdrop-filter:blur(8px);
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;
+  padding:max(24px,env(safe-area-inset-top,0px)) 0 16px;position:sticky;top:0;z-index:10;
+  background:color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
 }
-.header h1{font-size:24px;font-weight:700;letter-spacing:-0.3px;color:var(--text)}
+.header h1{
+  font-family:var(--font-heading);font-size:26px;font-weight:400;letter-spacing:-0.2px;color:var(--text);
+  font-style:italic;line-height:1.2;
+}
 .header-btns{display:flex;gap:8px;align-items:center}
 .header-btns button{
-  height:36px;border-radius:18px;border:1px solid var(--border);background:var(--card);
-  cursor:pointer;font-size:13px;font-weight:500;color:var(--text-secondary);
-  padding:0 14px;transition:all .15s ease;font-family:var(--font);
-  display:flex;align-items:center;gap:4px;
+  height:34px;border-radius:17px;border:1px solid var(--border);background:var(--card);
+  cursor:pointer;font-size:12px;font-weight:500;color:var(--text-secondary);
+  padding:0 14px;transition:all .2s cubic-bezier(.4,0,.2,1);font-family:var(--font-body);
+  display:flex;align-items:center;gap:4px;letter-spacing:0.01em;
 }
-.header-btns button:active{transform:scale(.96);background:var(--hover)}
-.save-status{font-size:11px;color:var(--text-secondary);margin-left:8px;margin-right:auto}
+.header-btns button:active{transform:scale(.96);background:var(--hover-bg)}
+.save-status{
+  font-size:10px;color:var(--text-secondary);margin-left:10px;margin-right:auto;
+  letter-spacing:0.03em;text-transform:uppercase;
+}
 .save-status.dirty{color:var(--amber);font-weight:600}
-.save-status.syncing{color:var(--primary)}
+.save-status.syncing{color:var(--primary);animation:pulse-status 1s ease infinite}
 .save-status.error{color:var(--danger)}
+@keyframes pulse-status{0%,100%{opacity:1}50%{opacity:.5}}
 
-/* 添加栏 */
-.add-bar{
-  display:flex;gap:8px;margin:8px 0 20px;padding-top:4px;
-}
+/* Add bar */
+.add-bar{display:flex;gap:8px;margin:4px 0 24px}
 .add-bar input{
-  flex:1;padding:12px 16px;border:1.5px solid var(--border);border-radius:var(--radius);
-  font-size:15px;font-family:var(--font);background:var(--card);
-  transition:border-color .2s ease;outline:none;color:var(--text);
+  flex:1;padding:13px 16px;border:1.5px solid var(--border);border-radius:var(--radius);
+  font-size:15px;font-family:var(--font-body);background:var(--card);
+  transition:border-color .25s ease, box-shadow .25s ease;outline:none;color:var(--text);
 }
-.add-bar input:focus{border-color:var(--primary)}
-.add-bar input::placeholder{color:#C0C0C8}
+.add-bar input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(194,101,74,.08)}
+.add-bar input::placeholder{color:#C5BFB6;font-style:italic}
 .add-bar .btn-add-top{
-  padding:12px 18px;background:var(--gradient);color:#fff;border:none;
+  padding:13px 20px;background:var(--primary);color:#fff;border:none;
   border-radius:var(--radius);font-size:14px;font-weight:600;cursor:pointer;
-  transition:all .15s ease;white-space:nowrap;font-family:var(--font);
+  transition:all .2s cubic-bezier(.4,0,.2,1);white-space:nowrap;font-family:var(--font-body);
+  letter-spacing:0.02em;
 }
-.add-bar .btn-add-top:active{transform:scale(.96);opacity:.85}
+.add-bar .btn-add-top:active{transform:scale(.96);background:var(--primary-deeper)}
 
-/* 底栏 */
+/* Save bar */
 .save-bar{
   position:fixed;bottom:0;left:0;right:0;max-width:600px;margin:0 auto;
-  padding:12px 20px;padding-bottom:max(12px,env(safe-area-inset-bottom,12px));
+  padding:16px 20px;padding-bottom:max(16px,env(safe-area-inset-bottom,16px));
   display:flex;align-items:center;justify-content:center;z-index:10;
+  background:linear-gradient(to top, var(--bg) 60%, transparent);
 }
 .btn-save{
-  padding:11px 32px;background:var(--gradient);color:#fff;border:none;
+  padding:12px 40px;background:var(--primary);color:#fff;border:none;
   border-radius:24px;font-size:14px;font-weight:600;cursor:pointer;
-  transition:all .15s ease;box-shadow:0 2px 8px rgba(75,123,255,.25);
-  font-family:var(--font);letter-spacing:0.3px;
+  transition:all .25s cubic-bezier(.4,0,.2,1);
+  box-shadow:0 2px 12px rgba(194,101,74,.25);font-family:var(--font-body);
+  letter-spacing:0.04em;
 }
-.btn-save:active{transform:scale(.96);opacity:.85}
-.btn-save:disabled{background:#C8C8D0;box-shadow:none;cursor:not-allowed;transform:none}
+.btn-save:active{transform:scale(.96);background:var(--primary-deeper)}
+.btn-save:disabled{background:#D1CCC4;box-shadow:none;cursor:not-allowed;transform:none;color:#A09890}
 
-/* 返回栏 */
-.back-bar{margin-bottom:12px}
+/* Back bar */
+.back-bar{margin-bottom:16px}
 .btn-back{
-  padding:8px 0;border:none;background:none;cursor:pointer;font-size:14px;
-  color:var(--primary);font-weight:600;transition:all .12s ease;font-family:var(--font);
+  padding:10px 0;border:none;background:none;cursor:pointer;font-size:14px;
+  color:var(--primary);font-weight:600;transition:all .15s ease;font-family:var(--font-body);
+  display:inline-flex;align-items:center;gap:4px;
 }
-.btn-back:active{opacity:.6}
+.btn-back:active{opacity:.6;transform:translateX(-2px)}
 
-/* ================================================================
-   3. 待办列表
-   ================================================================ */
-.todo-list,.recycle-list{display:flex;flex-direction:column;gap:10px}
+/* ---- 3. Todo List ---- */
+.todo-list,.recycle-list{display:flex;flex-direction:column;gap:8px}
 .todo-item{
   background:var(--card);border-radius:var(--radius);
   border:var(--card-border);box-shadow:var(--shadow);
-  transition:all .15s ease;overflow:hidden;
+  transition:all .25s cubic-bezier(.4,0,.2,1);overflow:hidden;
   user-select:none;-webkit-user-select:none;
+  animation:card-in .35s ease both;
 }
+@keyframes card-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .todo-item:active{transform:scale(.985)}
-.todo-row{display:flex;align-items:center;gap:8px;padding:12px 14px}
-.children{margin-left:16px;padding:0 12px 8px 12px;display:flex;flex-direction:column;gap:8px}
-.children .children .children .children .children{margin-left:8px;padding:0 6px 4px 8px}
+.todo-row{display:flex;align-items:center;gap:10px;padding:14px 16px}
+.children{
+  margin-left:20px;padding:0 14px 10px 14px;display:flex;flex-direction:column;gap:6px;
+  border-left:1.5px dashed var(--border);
+}
+.children .children .children .children .children{margin-left:10px;padding:0 8px 4px 10px}
 
-/* 空状态 */
-.empty-state{text-align:center;padding:56px 20px;color:var(--text-secondary)}
-.empty-state p{font-size:14px;line-height:1.6}
+/* Empty state */
+.empty-state{
+  text-align:center;padding:72px 20px;color:var(--text-secondary);
+}
+.empty-state p{font-size:15px;line-height:1.7;font-style:italic}
 
-/* ================================================================
-   4. 控件
-   ================================================================ */
-/* 勾选框 */
+/* ---- 4. Controls ---- */
+/* Checkbox */
 .btn-check{
-  width:20px;height:20px;border-radius:50%;border:1.5px solid #C8C8CE;
-  background:none;cursor:pointer;flex-shrink:0;padding:0;
-  transition:all .2s ease;position:relative;
+  width:22px;height:22px;border-radius:50%;border:2px solid #D5CFC6;
+  background:transparent;cursor:pointer;flex-shrink:0;padding:0;
+  transition:all .3s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden;
 }
-.btn-check:active{transform:scale(.85)}
-.btn-check.checked{background:var(--gradient);border-color:transparent}
+.btn-check::before{
+  content:'';position:absolute;inset:-2px;border-radius:50%;
+  background:var(--primary);transform:scale(0);transition:transform .3s cubic-bezier(.4,0,.2,1);
+}
+.btn-check:active{transform:scale(.82)}
+.btn-check.checked{border-color:var(--primary)}
+.btn-check.checked::before{transform:scale(1)}
 .btn-check.checked::after{
-  content:'';position:absolute;top:4px;left:6px;
-  width:5px;height:9px;border:solid #fff;border-width:0 2px 2px 0;
-  transform:rotate(45deg);
+  content:'';position:absolute;top:5px;left:6px;width:5px;height:9px;
+  border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg);
+  z-index:1;animation:check-pop .3s cubic-bezier(.4,0,.2,1) both;
 }
+@keyframes check-pop{from{opacity:0;transform:rotate(45deg) scale(.5)}to{opacity:1;transform:rotate(45deg) scale(1)}}
 
-/* 文字 */
-.todo-text{flex:1;font-size:15px;line-height:1.4;word-break:break-word;color:var(--text);overflow:hidden;min-width:0}
-.todo-actions{display:flex;gap:2px;flex-shrink:0;margin-left:auto}
+/* Text */
+.todo-text{
+  flex:1;font-size:15px;line-height:1.45;word-break:break-word;color:var(--text);
+  overflow:hidden;min-width:0;cursor:text;padding:1px 0;
+  transition:color .3s ease;
+}
+.todo-actions{display:flex;gap:4px;flex-shrink:0;margin-left:auto;opacity:0;transition:opacity .2s ease}
 
-/* 操作按钮公共 */
+/* Action buttons */
 .btn-sub,.btn-del,.btn-restore,.btn-permadel{
-  width:30px;height:30px;border-radius:50%;border:none;background:transparent;
-  cursor:pointer;font-size:16px;transition:all .12s ease;
+  width:32px;height:32px;border-radius:50%;border:none;background:transparent;
+  cursor:pointer;font-size:15px;transition:all .15s ease;
   display:inline-flex;align-items:center;justify-content:center;
-  color:var(--text-secondary);padding:0;font-family:var(--font);
+  color:var(--text-secondary);padding:0;font-family:var(--font-body);
 }
 .btn-sub:active,.btn-del:active,.btn-restore:active,.btn-permadel:active{transform:scale(.9)}
 
-/* 添加子任务 */
-.btn-sub{color:var(--primary)}
-.btn-sub:active,.btn-sub:hover{background:#EEF2FF}
+/* Add sub-task */
+.btn-sub{color:var(--primary);font-size:18px;font-weight:300}
+.btn-sub:active,.btn-sub:hover{background:rgba(194,101,74,.08)}
 
-/* 删除 */
-.btn-del{color:var(--danger);font-size:14px;font-weight:700}
-.btn-del:active,.btn-del:hover{background:#FFF0F0}
-.btn-del.confirm{width:auto;border-radius:14px;padding:0 10px;font-size:11px;font-weight:600;background:var(--danger);color:#fff}
+/* Delete */
+.btn-del{color:var(--danger);font-size:14px;font-weight:600}
+.btn-del:active,.btn-del:hover{background:rgba(196,77,77,.08)}
+.btn-del.confirm{
+  width:auto;border-radius:14px;padding:0 12px;font-size:11px;font-weight:600;
+  background:var(--danger);color:#fff;letter-spacing:0.03em;
+}
 .btn-del.confirm:active,.btn-del.confirm:hover{background:var(--danger-hover)}
 
-/* 恢复 / 彻底删除 */
-.btn-restore{color:var(--primary);width:auto;border-radius:14px;padding:0 12px;font-size:12px;font-weight:600}
-.btn-permadel{color:var(--danger);width:auto;border-radius:14px;padding:0 12px;font-size:12px;font-weight:600}
+/* Restore / Permanent delete */
+.btn-restore{color:var(--primary);width:auto;border-radius:14px;padding:0 14px;font-size:12px;font-weight:600}
+.btn-restore:hover{background:rgba(194,101,74,.08)}
+.btn-permadel{color:var(--danger);width:auto;border-radius:14px;padding:0 14px;font-size:12px;font-weight:600}
+.btn-permadel:hover{background:rgba(196,77,77,.08)}
 
-/* 折叠 */
+/* Collapse */
 .btn-collapse{
-  width:20px;height:20px;border:none;background:none;cursor:pointer;
-  font-size:9px;color:#B0B0B8;padding:0;flex-shrink:0;
-  transition:all .15s ease;display:flex;align-items:center;justify-content:center;
+  width:22px;height:22px;border:none;background:none;cursor:pointer;
+  font-size:8px;color:#C5BFB6;padding:0;flex-shrink:0;
+  transition:all .2s ease;display:flex;align-items:center;justify-content:center;
+  border-radius:50%;
 }
+.btn-collapse:hover{color:var(--primary);background:rgba(194,101,74,.06)}
 .btn-collapse:active{transform:scale(.8)}
-.collapsed-hint{font-size:11px;color:var(--text-secondary);padding:4px 14px 10px}
+.collapsed-hint{
+  font-size:11px;color:var(--text-secondary);padding:6px 16px 12px;
+  font-style:italic;letter-spacing:0.02em;
+}
 
-/* 行内编辑 / 添加 */
+/* Inline edit / add */
 .inline-input{
-  width:100%;min-width:0;padding:6px 10px;border:1.5px solid var(--primary);border-radius:var(--radius-xs);
-  font-size:15px;font-family:var(--font);outline:none;background:var(--card);
+  width:100%;min-width:0;padding:7px 12px;border:2px solid var(--primary);border-radius:var(--radius-xs);
+  font-size:15px;font-family:var(--font-body);outline:none;background:var(--card);
+  box-shadow:0 0 0 4px rgba(194,101,74,.06);
 }
 .inline-add-row{
-  display:flex;align-items:center;gap:8px;padding:6px 14px 12px;
+  display:flex;align-items:center;gap:8px;padding:8px 16px 14px;
+  animation:slide-down .2s ease both;
 }
+@keyframes slide-down{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
 .inline-add-row input{
-  flex:1;padding:8px 12px;border:1.5px solid var(--primary);border-radius:var(--radius-xs);
-  font-size:14px;font-family:var(--font);outline:none;background:var(--card);
+  flex:1;padding:9px 14px;border:2px solid var(--primary);border-radius:var(--radius-xs);
+  font-size:14px;font-family:var(--font-body);outline:none;background:var(--card);
+  box-shadow:0 0 0 4px rgba(194,101,74,.06);
 }
 .inline-add-row .btn-confirm-add{
-  width:32px;height:32px;border:none;background:var(--gradient);color:#fff;
-  border-radius:50%;cursor:pointer;font-size:14px;display:flex;align-items:center;
-  justify-content:center;transition:all .12s ease;flex-shrink:0;padding:0;
+  width:34px;height:34px;border:none;background:var(--primary);color:#fff;
+  border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;
+  justify-content:center;transition:all .15s ease;flex-shrink:0;padding:0;
+  box-shadow:0 2px 8px rgba(194,101,74,.2);
 }
-.inline-add-row .btn-confirm-add:active{transform:scale(.9);opacity:.85}
+.inline-add-row .btn-confirm-add:active{transform:scale(.9);background:var(--primary-deeper)}
 
-/* ================================================================
-   5. 回收站
-   ================================================================ */
-.recycle-list{display:flex;flex-direction:column;gap:12px}
+/* ---- 5. Recycle Bin ---- */
+.recycle-list{display:flex;flex-direction:column;gap:10px}
 .bin-item{
   background:var(--card);border-radius:var(--radius);
   border:var(--card-border);box-shadow:var(--shadow);
-  padding:14px 16px;display:flex;align-items:center;gap:12px;
-  transition:all .15s ease;border-left:3px solid var(--primary);
-  opacity:.85;
+  padding:16px 18px;display:flex;align-items:center;gap:12px;
+  transition:all .2s ease;border-left:4px solid var(--primary);
+  animation:card-in .35s ease both;
 }
 .bin-item:active{transform:scale(.985)}
 .bin-text{flex:1;font-size:15px;word-break:break-word;color:var(--text)}
-.bin-date{font-size:11px;color:var(--text-secondary);white-space:nowrap;flex-shrink:0}
-.bin-actions{display:flex;gap:2px;flex-shrink:0}
+.bin-date{
+  font-size:11px;color:var(--text-secondary);white-space:nowrap;flex-shrink:0;
+  font-style:italic;letter-spacing:0.02em;
+}
+.bin-actions{display:flex;gap:4px;flex-shrink:0}
 
-/* ================================================================
-   6. 模态框与提示
-   ================================================================ */
+/* ---- 6. Modal & Settings ---- */
 .modal-overlay{
-  display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);
+  display:none;position:fixed;inset:0;background:rgba(45,42,36,.35);
   z-index:100;align-items:center;justify-content:center;
-  backdrop-filter:blur(3px);
+  backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
 }
-.modal-overlay.open{display:flex}
+.modal-overlay.open{display:flex;animation:fade-in .2s ease both}
+@keyframes fade-in{from{opacity:0}to{opacity:1}}
 .modal{
-  background:var(--card);border-radius:var(--radius);padding:24px;
-  width:calc(100% - 48px);max-width:380px;box-shadow:0 8px 32px rgba(0,0,0,.1);
+  background:var(--card);border-radius:var(--radius);padding:28px;
+  width:calc(100% - 48px);max-width:400px;
+  box-shadow:var(--shadow-modal);animation:modal-in .3s cubic-bezier(.4,0,.2,1) both;
+  border:1px solid var(--border);
 }
-.modal h2{font-size:17px;margin-bottom:18px;color:var(--text);font-weight:700}
+@keyframes modal-in{from{opacity:0;transform:scale(.94) translateY(12px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.modal h2{
+  font-family:var(--font-heading);font-size:22px;margin-bottom:20px;color:var(--text);
+  font-weight:400;letter-spacing:-0.3px;font-style:italic;
+}
 .modal p{font-size:13px;color:var(--text-secondary);margin-bottom:8px;line-height:1.5}
-.field-label{font-size:13px;font-weight:600;color:var(--text);display:block;margin-bottom:6px}
+.field-label{font-size:13px;font-weight:600;color:var(--text);display:block;margin-bottom:8px;letter-spacing:0.02em}
 .modal input{
-  width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);
-  font-size:14px;font-family:var(--font);outline:none;margin-bottom:6px;
-  transition:border-color .2s;background:var(--card);
+  width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);
+  font-size:14px;font-family:var(--font-body);outline:none;margin-bottom:8px;
+  transition:border-color .2s, box-shadow .2s;background:var(--card);
 }
-.modal input:focus{border-color:var(--primary)}
-.modal .btn-row{display:flex;gap:8px;justify-content:flex-end}
+.modal input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(194,101,74,.07)}
+.modal .btn-row{display:flex;gap:10px;justify-content:flex-end;margin-top:4px}
 .modal .btn-row button{
-  padding:9px 18px;border-radius:18px;font-size:13px;font-weight:600;
-  cursor:pointer;border:none;transition:all .12s ease;font-family:var(--font);
+  padding:10px 22px;border-radius:20px;font-size:13px;font-weight:600;
+  cursor:pointer;border:none;transition:all .15s ease;font-family:var(--font-body);
+  letter-spacing:0.02em;
 }
-.modal .btn-cancel{background:var(--hover);color:var(--text-secondary)}
+.modal .btn-cancel{background:var(--hover-bg);color:var(--text-secondary)}
 .modal .btn-cancel:active{transform:scale(.96)}
-.modal .btn-confirm{background:var(--gradient);color:#fff}
-.modal .btn-confirm:active{transform:scale(.96);opacity:.85}
-.modal .err-msg{color:var(--danger);font-size:12px;margin-bottom:8px;display:none}
-.modal a{color:var(--primary);font-size:12px;display:inline-block;margin-bottom:10px}
+.modal .btn-confirm{background:var(--primary);color:#fff}
+.modal .btn-confirm:active{transform:scale(.96);background:var(--primary-deeper)}
+.modal .err-msg{color:var(--danger);font-size:12px;margin-bottom:10px;display:none;font-style:italic}
+.modal a{
+  color:var(--primary);font-size:12px;display:inline-block;margin-bottom:12px;
+  text-decoration:none;border-bottom:1px dotted var(--primary);
+}
+.modal a:hover{opacity:.8}
 
-/* 开关 */
-.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;margin:4px 0 6px}
-.toggle-row span{font-size:14px;color:var(--text)}
-.toggle-switch{position:relative;width:46px;height:26px;flex-shrink:0}
+/* Toggle switch */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;margin:4px 0 8px;border-top:1px solid var(--border)}
+.toggle-row span{font-size:14px;color:var(--text);font-weight:500}
+.toggle-switch{position:relative;width:48px;height:28px;flex-shrink:0}
 .toggle-switch input{opacity:0;width:0;height:0}
-.toggle-slider{position:absolute;inset:0;background:#D1D1D6;border-radius:13px;cursor:pointer;transition:background .25s}
-.toggle-slider::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;background:#fff;border-radius:50%;transition:transform .25s;box-shadow:0 1px 3px rgba(0,0,0,.15)}
-.toggle-switch input:checked+.toggle-slider{background:var(--gradient)}
+.toggle-slider{
+  position:absolute;inset:0;background:#D1CCC4;border-radius:14px;cursor:pointer;
+  transition:background .25s ease;
+}
+.toggle-slider::after{
+  content:'';position:absolute;top:3px;left:3px;width:22px;height:22px;background:#fff;
+  border-radius:50%;transition:transform .25s cubic-bezier(.4,0,.2,1);
+  box-shadow:0 1px 3px rgba(0,0,0,.12);
+}
+.toggle-switch input:checked+.toggle-slider{background:var(--primary)}
 .toggle-switch input:checked+.toggle-slider::after{transform:translateX(20px)}
 
 /* Toast */
 .toast-container{
-  position:fixed;top:calc(20px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:200;
-  display:flex;flex-direction:column;gap:8px;pointer-events:none;
+  position:fixed;
+  top:calc(20px + env(safe-area-inset-top,0px));
+  left:50%;transform:translateX(-50%);z-index:200;
+  display:flex;flex-direction:column;gap:8px;pointer-events:none;width:auto;
 }
 .toast{
-  padding:10px 20px;border-radius:20px;font-size:13px;font-weight:500;
-  color:#fff;pointer-events:auto;animation:toastIn .3s ease;
-  box-shadow:0 4px 12px rgba(0,0,0,.15);text-align:center;
+  padding:11px 22px;border-radius:22px;font-size:13px;font-weight:500;
+  color:#fff;pointer-events:auto;animation:toastIn .35s cubic-bezier(.4,0,.2,1) both;
+  box-shadow:0 4px 16px rgba(45,42,36,.15);text-align:center;
+  white-space:nowrap;font-family:var(--font-body);letter-spacing:0.02em;
 }
-.toast.success{background:#34C759}
+.toast.success{background:#6B8F71}
 .toast.error{background:var(--danger)}
 .toast.info{background:var(--primary)}
-@keyframes toastIn{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes toastIn{from{opacity:0;transform:translateY(-14px);filter:blur(4px)}to{opacity:1;transform:translateY(0);filter:blur(0)}}
 
-/* ================================================================
-   7. 拖拽状态
-   ================================================================ */
-.todo-item.completed{opacity:.6}
-.completed .todo-text{color:var(--text-done);text-decoration:line-through}
-.todo-item.dragging{opacity:.35;transform:scale(.97)}
-.todo-item.drag-over-before{border-top:3px solid var(--primary);border-radius:0}
-.todo-item.drag-over-after{border-bottom:3px solid var(--primary);border-radius:0}
-.todo-item.drag-over-child{box-shadow:0 0 0 2px var(--primary);background:#F0F4FF}
+/* ---- 7. Drag States ---- */
+.todo-item.completed{
+  background:var(--completed-tint);border-color:#D8DCD0;
+}
+.completed .todo-text{color:var(--text-done);text-decoration:line-through;text-decoration-color:#C5BFB6;text-decoration-thickness:1.5px}
+.todo-item.dragging{opacity:.3;transform:scale(.96)}
+.todo-item.drag-over-before{
+  border-top:3px solid var(--primary);border-radius:0;
+  box-shadow:0 -4px 12px rgba(194,101,74,.08);
+}
+.todo-item.drag-over-after{
+  border-bottom:3px solid var(--primary);border-radius:0;
+  box-shadow:0 4px 12px rgba(194,101,74,.08);
+}
+.todo-item.drag-over-child{
+  box-shadow:0 0 0 2.5px var(--primary);background:rgba(194,101,74,.03);
+}
 .drag-clone{
   position:fixed;z-index:999;pointer-events:none;
-  background:var(--card);border:var(--card-border);border-radius:var(--radius);
-  box-shadow:0 8px 24px rgba(0,0,0,.15);padding:10px 14px;
-  font-size:15px;color:var(--text);opacity:.92;
+  background:var(--card);border:1.5px solid var(--primary);border-radius:var(--radius);
+  box-shadow:0 12px 32px rgba(45,42,36,.18);padding:12px 16px;
+  font-size:15px;color:var(--text);opacity:.94;
   max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  font-family:var(--font);transform:translate(-50%,-50%) rotate(2deg);
+  font-family:var(--font-body);transform:translate(-50%,-50%) rotate(1.5deg);
 }
 
-/* ================================================================
-   8. 工具类与加载
-   ================================================================ */
-.loading{text-align:center;padding:56px 20px;color:var(--text-secondary)}
+/* ---- 8. Utilities & Loading ---- */
+.loading{text-align:center;padding:72px 20px;color:var(--text-secondary)}
 .spinner{
   width:28px;height:28px;border:2.5px solid var(--border);border-top-color:var(--primary);
-  border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 14px;
+  border-radius:50%;animation:spin .65s linear infinite;margin:0 auto 16px;
 }
 @keyframes spin{to{transform:rotate(360deg)}}
 
 ::-webkit-scrollbar{width:4px}
 ::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:#ccc;border-radius:2px}
+::-webkit-scrollbar-thumb{background:#D1CCC4;border-radius:2px}
+::-webkit-scrollbar-thumb:hover{background:#B5AFA6}
 
-/* ================================================================
-   9. 响应式
-   ================================================================ */
-@media(max-width:480px){
+/* ---- 9. Responsive ---- */
+
+/* Desktop: >=768px */
+@media(min-width:768px){
+  .app{max-width:680px;padding:0 24px 120px}
+  .header{padding:max(32px,env(safe-area-inset-top,0px)) 0 20px}
+  .header h1{font-size:30px}
+  .header-btns button{
+    height:36px;border-radius:18px;font-size:13px;padding:0 16px;
+    transition:all .2s cubic-bezier(.4,0,.2,1), background .2s ease;
+  }
+  .header-btns button:hover{background:var(--hover-bg);color:var(--text);border-color:#C5BFB6}
+  .add-bar{margin:4px 0 28px}
+  .add-bar input{padding:14px 18px;font-size:16px}
+  .add-bar .btn-add-top{padding:14px 24px;font-size:15px}
+  .todo-row{padding:16px 20px;gap:12px}
+  .todo-row:hover{background:rgba(194,101,74,.015)}
+  .todo-row:hover .todo-actions{opacity:1}
+  .children{margin-left:28px;padding:0 16px 12px 16px}
+  .todo-item:hover{
+    box-shadow:var(--shadow-hover);transform:translateY(-1px);
+  }
+  .todo-item.dragging:hover{transform:scale(.96)}
+  .todo-item.completed:hover{transform:none}
+  .btn-check{width:24px;height:24px}
+  .btn-check:hover{border-color:var(--primary)}
+  .btn-sub:hover,.btn-del:hover{opacity:1}
+  .btn-save{
+    padding:13px 44px;font-size:15px;
+    transition:all .25s cubic-bezier(.4,0,.2,1), box-shadow .25s ease;
+  }
+  .btn-save:not(:disabled):hover{box-shadow:0 4px 20px rgba(194,101,74,.35);transform:translateY(-1px)}
+  .btn-save:not(:disabled):active{transform:scale(.96) translateY(0)}
+  .bin-item:hover{box-shadow:var(--shadow-hover);transform:translateY(-1px)}
+  .bin-item:active{transform:scale(.985)}
+  .save-bar{max-width:680px}
+  .modal{padding:32px}
+  .modal h2{font-size:24px}
+}
+
+/* Mobile: <768px */
+@media(max-width:767px){
+  .app{padding:0 14px 110px}
   .header{padding:max(18px,env(safe-area-inset-top,0px)) 0 14px}
-  .header h1{font-size:22px}
-  .app{padding:0 12px 90px}
-  .todo-row{padding:10px 12px}
-  .save-bar{padding:10px 12px;padding-bottom:max(10px,env(safe-area-inset-bottom,10px))}
-  .btn-save{padding:11px 28px;font-size:13px}
+  .header h1{font-size:23px}
+  .header-btns button{padding:0 12px;font-size:11px;height:32px}
+  .save-status{font-size:9px}
+  .add-bar input{padding:11px 14px;font-size:14px}
+  .add-bar .btn-add-top{padding:11px 16px;font-size:13px}
+  .todo-row{padding:12px 14px;gap:8px}
+  .todo-actions{opacity:1}
+  .children{margin-left:16px;padding:0 10px 8px 10px}
+  .btn-check{width:22px;height:22px}
+  .btn-sub,.btn-del{width:34px;height:34px;font-size:16px}
+  .todo-text{font-size:14px}
+  .save-bar{padding:12px 16px;padding-bottom:max(12px,env(safe-area-inset-bottom,12px))}
+  .btn-save{padding:11px 32px;font-size:13px}
+  .bin-item{padding:14px 16px;flex-wrap:wrap}
+  .bin-actions{margin-left:auto}
+  .empty-state{padding:56px 16px}
+  .empty-state p{font-size:14px}
+  .modal{padding:22px 20px;width:calc(100% - 32px)}
+  .modal h2{font-size:20px}
 }
 </style>
 </head>
@@ -327,7 +454,7 @@ body{
 
   <div class="todo-list" id="todoList"></div>
   <div class="recycle-list" id="recycleList" style="display:none">
-    <div class="back-bar"><button class="btn-back" id="btnBack">‹ 返回</button></div>
+    <div class="back-bar"><button class="btn-back" id="btnBack">&lsaquo; 返回</button></div>
     <div id="recycleItems"></div>
   </div>
 </div>
