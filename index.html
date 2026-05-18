@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no">
 <meta name="theme-color" content="#C2654A">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="待办清单">
@@ -30,17 +30,24 @@
   --font-heading:Georgia,'Times New Roman','Noto Serif SC',serif;
   --font-body:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
 }
-html{background:var(--bg)}
+html{background:var(--bg);overscroll-behavior:none;overflow:hidden;height:100%}
 body{
   font-family:var(--font-body);background:var(--bg);color:var(--text);
   min-height:100vh;min-height:100dvh;line-height:1.55;
   -webkit-tap-highlight-color:transparent;
   -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  overflow-y:auto;overflow-x:hidden;height:100%;overscroll-behavior:none;
+  -webkit-overflow-scrolling:touch;touch-action:manipulation;
+  -webkit-user-select:none;user-select:none;
+  -webkit-touch-callout:none;
   background-image:
     radial-gradient(ellipse at 20% 10%, rgba(194,101,74,.03) 0%, transparent 60%),
     radial-gradient(ellipse at 80% 60%, rgba(143,168,138,.03) 0%, transparent 50%),
     repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(45,42,36,.004) 2px, rgba(45,42,36,.004) 4px);
 }
+
+/* Allow text selection in inputs */
+input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
 
 /* ---- 2. Layout ---- */
 .app{max-width:600px;margin:0 auto;padding:0 16px 120px}
