@@ -221,7 +221,7 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
 /* Inline edit / add */
 .inline-input{
   width:100%;min-width:0;padding:7px 12px;border:2px solid var(--primary);border-radius:var(--radius-xs);
-  font-size:15px;font-family:var(--font-body);outline:none;background:var(--card);
+  font-size:16px;font-family:var(--font-body);outline:none;background:var(--card);
   box-shadow:0 0 0 4px rgba(194,101,74,.06);
 }
 .inline-add-row{
@@ -231,7 +231,7 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
 @keyframes slide-down{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
 .inline-add-row input{
   flex:1;padding:9px 14px;border:2px solid var(--primary);border-radius:var(--radius-xs);
-  font-size:14px;font-family:var(--font-body);outline:none;background:var(--card);
+  font-size:16px;font-family:var(--font-body);outline:none;background:var(--card);
   box-shadow:0 0 0 4px rgba(194,101,74,.06);
 }
 .inline-add-row .btn-confirm-add{
@@ -301,6 +301,9 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
 .modal .btn-cancel:active{transform:scale(.96)}
 .modal .btn-confirm{background:var(--primary);color:#fff}
 .modal .btn-confirm:active{transform:scale(.96);background:var(--primary-deeper)}
+.modal .btn-danger{background:var(--danger)}
+.modal .btn-danger:active{background:var(--danger-hover)}
+.modal-confirm p{font-size:14px;color:var(--text);margin-bottom:20px;line-height:1.5}
 .modal .err-msg{color:var(--danger);font-size:12px;margin-bottom:10px;display:none;font-style:italic}
 .modal a{
   color:var(--primary);font-size:12px;display:inline-block;margin-bottom:12px;
@@ -429,7 +432,7 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
   .header h1{font-size:23px}
   .header-btns button{padding:0 12px;font-size:11px;height:32px}
   .save-status{font-size:9px}
-  .add-bar input{padding:11px 14px;font-size:14px}
+  .add-bar input{padding:11px 14px;font-size:16px}
   .add-bar .btn-add-top{padding:11px 16px;font-size:13px}
   .todo-row{padding:12px 14px;gap:8px}
   .todo-actions{opacity:1}
@@ -445,6 +448,7 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
   .empty-state p{font-size:14px}
   .modal{padding:22px 20px;width:calc(100% - 32px)}
   .modal h2{font-size:20px}
+  .modal input{font-size:16px}
 }
 </style>
 </head>
@@ -492,6 +496,17 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
     <div class="btn-row">
       <button class="btn-cancel" id="btnTokenCancel">取消</button>
       <button class="btn-confirm" id="btnTokenSave">保存</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal modal-confirm">
+    <h2 id="confirmTitle">确认操作</h2>
+    <p id="confirmMsg"></p>
+    <div class="btn-row">
+      <button class="btn-cancel" id="btnConfirmCancel">取消</button>
+      <button class="btn-confirm btn-danger" id="btnConfirmOk">确定</button>
     </div>
   </div>
 </div>
@@ -1259,6 +1274,20 @@ var App = {
     if (el) el.textContent = 'v' + ver + ' / ' + date;
   },
 
+  confirmCallback: null,
+
+  showConfirm: function(title, msg, cb) {
+    App.confirmCallback = cb;
+    document.getElementById('confirmTitle').textContent = title;
+    document.getElementById('confirmMsg').textContent = msg;
+    document.getElementById('confirmModal').classList.add('open');
+  },
+
+  hideConfirm: function() {
+    document.getElementById('confirmModal').classList.remove('open');
+    App.confirmCallback = null;
+  },
+
   settingsSaveToken: async function() {
     var token = App.dom.tokenInput.value.trim();
     if (!token) {
@@ -1289,7 +1318,7 @@ var App = {
     delete: function(id) { App.handleDeleteClick(id); },
     addSub: function(id, e) { e.stopPropagation(); App.renderInlineAdd(id); },
     restore: function(id) { App.actionRestoreTodo(id); },
-    permDelete: function(id) { if (confirm('确定彻底删除？此操作不可撤销。')) App.actionPermDelete(id); },
+    permDelete: function(id) { App.showConfirm('彻底删除', '确定彻底删除？此操作不可撤销。', function() { App.actionPermDelete(id); }); },
     edit: function(id, el) { App.renderStartEdit(el, id); }
   },
 
@@ -1325,9 +1354,8 @@ var App = {
     });
     App.dom.addInput.addEventListener('focus', function() {
       setTimeout(function() {
-        App.dom.addInput.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        window.scrollBy(0, -100);
-      }, 350);
+        App.dom.addInput.scrollIntoView({ behavior: 'auto', block: 'nearest' });
+      }, 200);
     });
 
     // 保存
@@ -1344,6 +1372,17 @@ var App = {
     });
     App.dom.settingsModal.addEventListener('click', function(e) {
       if (e.target === App.dom.settingsModal) App.settingsHide();
+    });
+
+    // 确认弹窗
+    document.getElementById('btnConfirmOk').addEventListener('click', function() {
+      var cb = App.confirmCallback;
+      App.hideConfirm();
+      if (cb) cb();
+    });
+    document.getElementById('btnConfirmCancel').addEventListener('click', function() { App.hideConfirm(); });
+    document.getElementById('confirmModal').addEventListener('click', function(e) {
+      if (e.target === document.getElementById('confirmModal')) App.hideConfirm();
     });
 
     // 回收站
