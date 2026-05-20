@@ -490,8 +490,8 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
       <label class="toggle-switch"><input type="checkbox" id="toggleShowCompleted"><span class="toggle-slider"></span></label>
     </div>
     <div class="toggle-row">
-      <span>折叠列表</span>
-      <label class="toggle-switch"><input type="checkbox" id="toggleDefaultCollapse"><span class="toggle-slider"></span></label>
+      <span>自动展开列表</span>
+      <label class="toggle-switch"><input type="checkbox" id="toggleAutoExpand"><span class="toggle-slider"></span></label>
     </div>
     <div class="version-info" id="versionInfo"></div>
     <div class="btn-row">
@@ -629,7 +629,7 @@ var App = {
     collapsed: {},
     _collapseUserExpanded: {},
     showCompleted: localStorage.getItem('showCompleted') === 'true',
-    defaultCollapse: localStorage.getItem('defaultCollapse') === 'true',
+    autoExpand: localStorage.getItem('autoExpand') === 'true',
     deleteConfirm: null,
     deleteConfirmTimeout: null,
     dirty: false,
@@ -1007,8 +1007,8 @@ var App = {
     App.state.loading = false;
     App.state.dirty = false;
     App.updateSaveUI();
-    if (App.state.defaultCollapse) {
-      App._applyDefaultCollapse(App.state.todos);
+    if (!App.state.autoExpand) {
+      App._clearAutoExpand(App.state.todos);
     }
     App.renderAll();
   },
@@ -1209,7 +1209,7 @@ var App = {
     level = level || 0;
     var hasChildren = item.children && item.children.length;
     var isCollapsed = App.state.collapsed[item.id];
-    if (App.state.defaultCollapse && hasChildren && !App.state._collapseUserExpanded[item.id]) {
+    if (!App.state.autoExpand && hasChildren && !App.state._collapseUserExpanded[item.id]) {
       App.state.collapsed[item.id] = true;
       isCollapsed = true;
     }
@@ -1647,25 +1647,25 @@ var App = {
     App.updateCollapseBtn(id);
   },
 
-  _applyDefaultCollapse: function(list) {
+  _applyAutoExpand: function(list) {
+    App.state._collapseUserExpanded = {};
+    for (var i = 0; i < list.length; i++) {
+      var item = list[i];
+      delete App.state.collapsed[item.id];
+      if (item.children && item.children.length > 0) {
+        App._applyAutoExpand(item.children);
+      }
+    }
+  },
+
+  _clearAutoExpand: function(list) {
     for (var i = 0; i < list.length; i++) {
       var item = list[i];
       if (item.children && item.children.length > 0 && !App.state._collapseUserExpanded[item.id]) {
         App.state.collapsed[item.id] = true;
       }
       if (item.children && item.children.length > 0) {
-        App._applyDefaultCollapse(item.children);
-      }
-    }
-  },
-
-  _clearDefaultCollapse: function(list) {
-    App.state._collapseUserExpanded = {};
-    for (var i = 0; i < list.length; i++) {
-      var item = list[i];
-      delete App.state.collapsed[item.id];
-      if (item.children && item.children.length > 0) {
-        App._clearDefaultCollapse(item.children);
+        App._clearAutoExpand(item.children);
       }
     }
   },
@@ -1702,7 +1702,7 @@ var App = {
     App.dom.tokenInput.value = App.apiGetToken();
     App.dom.tokenError.style.display = 'none';
     document.getElementById('toggleShowCompleted').checked = App.state.showCompleted;
-    document.getElementById('toggleDefaultCollapse').checked = App.state.defaultCollapse;
+    document.getElementById('toggleAutoExpand').checked = App.state.autoExpand;
     App.dom.settingsModal.classList.add('open');
   },
 
@@ -1825,13 +1825,13 @@ var App = {
         el.style.display = App.state.showCompleted ? '' : 'none';
       });
     });
-    document.getElementById('toggleDefaultCollapse').addEventListener('change', function() {
-      App.state.defaultCollapse = this.checked;
-      localStorage.setItem('defaultCollapse', App.state.defaultCollapse ? 'true' : 'false');
-      if (App.state.defaultCollapse) {
-        App._applyDefaultCollapse(App.state.todos);
+    document.getElementById('toggleAutoExpand').addEventListener('change', function() {
+      App.state.autoExpand = this.checked;
+      localStorage.setItem('autoExpand', App.state.autoExpand ? 'true' : 'false');
+      if (App.state.autoExpand) {
+        App._applyAutoExpand(App.state.todos);
       } else {
-        App._clearDefaultCollapse(App.state.todos);
+        App._clearAutoExpand(App.state.todos);
       }
       App.renderTodoList();
     });
