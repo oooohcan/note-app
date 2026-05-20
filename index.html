@@ -81,14 +81,15 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
 @keyframes pulse-status{0%,100%{opacity:1}50%{opacity:.5}}
 
 /* Add bar */
-.add-bar{display:flex;gap:8px;margin:4px 0 24px}
-.add-bar input{
-  flex:1;padding:13px 16px;border:1.5px solid var(--border);border-radius:var(--radius);
+.add-bar{display:flex;gap:8px;margin:4px 0 24px;align-items:flex-start}
+.add-bar textarea{
+  flex:1;padding:11px 16px;border:1.5px solid var(--border);border-radius:var(--radius);
   font-size:15px;font-family:var(--font-body);background:var(--card);
   transition:border-color .25s ease, box-shadow .25s ease;outline:none;color:var(--text);
+  resize:none;overflow-y:auto;min-height:46px;max-height:200px;line-height:1.55;
 }
-.add-bar input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(194,101,74,.08)}
-.add-bar input::placeholder{color:#C5BFB6;font-style:italic}
+.add-bar textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(194,101,74,.08)}
+.add-bar textarea::placeholder{color:#C5BFB6;font-style:italic}
 .add-bar .btn-add-top{
   padding:13px 20px;background:var(--primary);color:#fff;border:none;
   border-radius:var(--radius);font-size:14px;font-weight:600;cursor:pointer;
@@ -165,6 +166,10 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
   overflow:hidden;min-width:0;cursor:text;padding:1px 0;
   transition:color .3s ease;
   user-select:text;-webkit-user-select:text;-webkit-touch-callout:default;
+}
+.todo-text.editing{
+  padding:7px 12px;border:2px solid var(--primary);border-radius:var(--radius-xs);
+  box-shadow:0 0 0 4px rgba(194,101,74,.06);outline:none;background:var(--card);
 }
 .todo-actions{display:flex;gap:4px;flex-shrink:0;margin-left:auto;opacity:0;transition:opacity .2s ease}
 
@@ -392,7 +397,7 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
   }
   .header-btns button:hover{background:var(--hover-bg);color:var(--text);border-color:#C5BFB6}
   .add-bar{margin:4px 0 28px}
-  .add-bar input{padding:14px 18px;font-size:16px}
+  .add-bar textarea{padding:13px 18px;font-size:16px;min-height:48px}
   .add-bar .btn-add-top{padding:14px 24px;font-size:15px}
   .todo-row{padding:12px 18px;gap:12px}
   .todo-row:hover{background:rgba(194,101,74,.015)}
@@ -426,7 +431,7 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
   .header h1{font-size:23px}
   .header-btns button{padding:0 12px;font-size:11px;height:32px}
   .save-status{font-size:9px}
-  .add-bar input{padding:11px 14px;font-size:16px}
+  .add-bar textarea{padding:11px 14px;font-size:16px;min-height:44px}
   .add-bar .btn-add-top{padding:11px 16px;font-size:13px}
   .todo-row{padding:10px 12px;gap:8px}
   .todo-actions{opacity:1}
@@ -458,7 +463,7 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
   </header>
 
   <div class="add-bar" id="addBar">
-    <input type="text" id="addInput" placeholder="添加新任务..." maxlength="500">
+    <textarea id="addInput" placeholder="添加新任务..." maxlength="500" rows="1"></textarea>
     <button class="btn-add-top" id="btnAdd">添加</button>
   </div>
 
@@ -483,6 +488,10 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webk
     <div class="toggle-row">
       <span>显示已完成待办</span>
       <label class="toggle-switch"><input type="checkbox" id="toggleShowCompleted"><span class="toggle-slider"></span></label>
+    </div>
+    <div class="toggle-row">
+      <span>自动展开列表</span>
+      <label class="toggle-switch"><input type="checkbox" id="toggleAutoExpand"><span class="toggle-slider"></span></label>
     </div>
     <div class="version-info" id="versionInfo"></div>
     <div class="btn-row">
@@ -618,7 +627,9 @@ var App = {
     fileSha: null,
     showingRecycleBin: false,
     collapsed: {},
+    _collapseUserExpanded: {},
     showCompleted: localStorage.getItem('showCompleted') === 'true',
+    autoExpand: localStorage.getItem('autoExpand') === 'true',
     deleteConfirm: null,
     deleteConfirmTimeout: null,
     dirty: false,
@@ -996,6 +1007,9 @@ var App = {
     App.state.loading = false;
     App.state.dirty = false;
     App.updateSaveUI();
+    if (!App.state.autoExpand) {
+      App._clearAutoExpand(App.state.todos);
+    }
     App.renderAll();
   },
 
@@ -1195,6 +1209,10 @@ var App = {
     level = level || 0;
     var hasChildren = item.children && item.children.length;
     var isCollapsed = App.state.collapsed[item.id];
+    if (!App.state.autoExpand && hasChildren && !App.state._collapseUserExpanded[item.id]) {
+      App.state.collapsed[item.id] = true;
+      isCollapsed = true;
+    }
     var confirmDelete = App.state.deleteConfirm === item.id;
 
     var collapseBtn;
@@ -1323,16 +1341,29 @@ var App = {
 
   // ---- 行内编辑 ----
   renderStartEdit: function(textEl, id) {
-    if (textEl.querySelector('input')) return;
+    if (textEl.isContentEditable) return;
     var currentText = textEl.textContent;
-    var input = h('input', { type: 'text', class: 'inline-input', value: currentText, maxlength: '500' });
-    textEl.textContent = '';
-    textEl.appendChild(input);
-    input.focus();
-    input.select();
+    textEl.contentEditable = 'true';
+    textEl.classList.add('editing');
+    textEl.focus();
+
+    var sel = window.getSelection();
+    var range = document.createRange();
+    if (textEl.firstChild) {
+      range.setStartAfter(textEl.lastChild);
+      range.collapse(true);
+    } else {
+      range.setStart(textEl, 0);
+      range.collapse(true);
+    }
+    sel.removeAllRanges();
+    sel.addRange(range);
 
     var commit = function() {
-      var newText = input.value.trim();
+      if (!textEl.isContentEditable) return;
+      var newText = textEl.textContent.trim();
+      textEl.contentEditable = 'false';
+      textEl.classList.remove('editing');
       if (newText && newText !== currentText) {
         App.actionUpdateText(id, newText);
       } else {
@@ -1340,11 +1371,21 @@ var App = {
       }
     };
 
-    input.addEventListener('keydown', function(ev) {
+    var onKey = function(ev) {
       if (ev.key === 'Enter') { ev.preventDefault(); commit(); }
-      if (ev.key === 'Escape') { textEl.textContent = currentText; }
-    });
-    input.addEventListener('blur', commit);
+      if (ev.key === 'Escape') {
+        ev.preventDefault();
+        textEl.contentEditable = 'false';
+        textEl.classList.remove('editing');
+        textEl.textContent = currentText;
+      }
+    };
+
+    textEl.addEventListener('keydown', onKey);
+    textEl.addEventListener('blur', function() {
+      textEl.removeEventListener('keydown', onKey);
+      commit();
+    }, { once: true });
   },
 
   // ==================== 业务操作 ====================
@@ -1397,6 +1438,7 @@ var App = {
       App.state.collapsed[id] = true;
     } else {
       delete App.state.collapsed[id];
+      App.state._collapseUserExpanded[id] = true;
     }
 
     // Re-sort data — find parent array and move item to correct position
@@ -1567,8 +1609,10 @@ var App = {
     var wasCollapsed = !!App.state.collapsed[id];
     if (wasCollapsed) {
       delete App.state.collapsed[id];
+      App.state._collapseUserExpanded[id] = true;
     } else {
       App.state.collapsed[id] = true;
+      delete App.state._collapseUserExpanded[id];
     }
 
     var el = App.findItemEl(id);
@@ -1603,6 +1647,29 @@ var App = {
     App.updateCollapseBtn(id);
   },
 
+  _applyAutoExpand: function(list) {
+    App.state._collapseUserExpanded = {};
+    for (var i = 0; i < list.length; i++) {
+      var item = list[i];
+      delete App.state.collapsed[item.id];
+      if (item.children && item.children.length > 0) {
+        App._applyAutoExpand(item.children);
+      }
+    }
+  },
+
+  _clearAutoExpand: function(list) {
+    for (var i = 0; i < list.length; i++) {
+      var item = list[i];
+      if (item.children && item.children.length > 0 && !App.state._collapseUserExpanded[item.id]) {
+        App.state.collapsed[item.id] = true;
+      }
+      if (item.children && item.children.length > 0) {
+        App._clearAutoExpand(item.children);
+      }
+    }
+  },
+
   handleDeleteClick: function(id) {
     if (App.state.deleteConfirm === id) {
       if (App.state.deleteConfirmTimeout) {
@@ -1635,6 +1702,7 @@ var App = {
     App.dom.tokenInput.value = App.apiGetToken();
     App.dom.tokenError.style.display = 'none';
     document.getElementById('toggleShowCompleted').checked = App.state.showCompleted;
+    document.getElementById('toggleAutoExpand').checked = App.state.autoExpand;
     App.dom.settingsModal.classList.add('open');
   },
 
@@ -1643,8 +1711,8 @@ var App = {
   },
 
   setupVersion: function() {
-    var ver = '1.1.1';
-    var date = '2026-05-18';
+    var ver = '1.2.0';
+    var date = '2026-05-20';
     var el = document.getElementById('versionInfo');
     if (el) el.textContent = 'v' + ver + ' / ' + date;
   },
@@ -1727,7 +1795,14 @@ var App = {
       App.dom.addInput.focus();
     });
     App.dom.addInput.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') App.dom.btnAdd.click();
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        App.dom.btnAdd.click();
+      }
+    });
+    App.dom.addInput.addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = Math.min(this.scrollHeight, 200) + 'px';
     });
     App.dom.addInput.addEventListener('focus', function() {
       setTimeout(function() {
@@ -1749,6 +1824,16 @@ var App = {
       completedItems.forEach(function(el) {
         el.style.display = App.state.showCompleted ? '' : 'none';
       });
+    });
+    document.getElementById('toggleAutoExpand').addEventListener('change', function() {
+      App.state.autoExpand = this.checked;
+      localStorage.setItem('autoExpand', App.state.autoExpand ? 'true' : 'false');
+      if (App.state.autoExpand) {
+        App._applyAutoExpand(App.state.todos);
+      } else {
+        App._clearAutoExpand(App.state.todos);
+      }
+      App.renderTodoList();
     });
     App.dom.settingsModal.addEventListener('click', function(e) {
       if (e.target === App.dom.settingsModal) App.settingsHide();
@@ -1784,12 +1869,13 @@ var App = {
     document.addEventListener('mousedown', function(e) {
       if (App.state.showingRecycleBin) return;
       if (e.button !== 0) return;
-      if (e.target.closest('button,input,[data-action]')) return;
+      var excl = e.target.closest('input,textarea,.inline-add-row,.btn-del,.btn-sub,.btn-restore,.btn-permadel,.todo-text.editing');
+      if (excl) return;
       var item = e.target.closest('.todo-item');
       if (!item) return;
       e.preventDefault();
       App.dnd.sx = e.clientX; App.dnd.sy = e.clientY;
-      App.dnd.timer = setTimeout(function() { App.dnd.start(item, App.dnd.sx, App.dnd.sy); }, 400);
+      App.dnd.timer = setTimeout(function() { App.dnd.start(item, App.dnd.sx, App.dnd.sy); }, 250);
     });
     document.addEventListener('mousemove', function(e) {
       if (App.dnd.timer && !App.dnd.active) {
@@ -1805,12 +1891,13 @@ var App = {
     // 触摸
     document.addEventListener('touchstart', function(e) {
       if (App.state.showingRecycleBin) return;
-      if (e.target.closest('button,input,[data-action]')) return;
+      var excl = e.target.closest('input,textarea,.inline-add-row,.btn-del,.btn-sub,.btn-restore,.btn-permadel,.todo-text.editing');
+      if (excl) return;
       var item = e.target.closest('.todo-item');
       if (!item) return;
       var t = e.touches[0];
       App.dnd.sx = t.clientX; App.dnd.sy = t.clientY;
-      App.dnd.timer = setTimeout(function() { App.dnd.start(item, t.clientX, t.clientY); }, 500);
+      App.dnd.timer = setTimeout(function() { App.dnd.start(item, t.clientX, t.clientY); }, 300);
     }, { passive: false });
     document.addEventListener('touchmove', function(e) {
       if (App.dnd.timer && !App.dnd.active) {
