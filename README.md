@@ -10,14 +10,7 @@
 
 ### 2. 启动服务
 
-```bash
-cd C:\Users\Sean\Documents\note
-python -m http.server 8080
-```
-
-### 3. 打开浏览器
-
-访问 **http://localhost:8080**，首次打开会提示输入令牌。
+浏览器打开index.html，首次打开会提示输入令牌。
 
 ## 功能
 
