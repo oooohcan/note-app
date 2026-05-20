@@ -6,11 +6,18 @@
 
 ### 1. 获取 Gitee 令牌
 
-调整html内的存储仓库指向，前往 [Gitee 私人令牌](https://gitee.com/profile/personal_access_tokens) 创建一个访问令牌，勾选 `projects` 权限。
+前往 [Gitee 私人令牌](https://gitee.com/profile/personal_access_tokens) 创建一个访问令牌，勾选 `projects` 权限。
 
 ### 2. 启动服务
 
-浏览器打开index.html，首次打开会提示输入令牌。
+```bash
+cd C:\Users\Sean\Documents\note
+python -m http.server 8080
+```
+
+### 3. 打开浏览器
+
+访问 **http://localhost:8080**，首次打开会提示输入令牌。
 
 ## 功能
 
