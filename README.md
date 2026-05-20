@@ -6,7 +6,7 @@
 
 ### 1. 获取 Gitee 令牌
 
-前往 [Gitee 私人令牌](https://gitee.com/profile/personal_access_tokens) 创建一个访问令牌，勾选 `projects` 权限。
+调整html内的存储仓库指向，前往 [Gitee 私人令牌](https://gitee.com/profile/personal_access_tokens) 创建一个访问令牌，勾选 `projects` 权限。
 
 ### 2. 启动服务
 
