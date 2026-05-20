@@ -633,6 +633,7 @@ var App = {
     deleteConfirm: null,
     deleteConfirmTimeout: null,
     dirty: false,
+    autoSaveTimer: null,
     syncing: false,
     loading: true
   },
@@ -696,6 +697,15 @@ var App = {
   markDirty: function() {
     App.state.dirty = true;
     App.updateSaveUI();
+    // 设置自动保存定时器，5分钟（300,000毫秒）
+    if (App.state.autoSaveTimer) {
+      clearTimeout(App.state.autoSaveTimer);
+    }
+    App.state.autoSaveTimer = setTimeout(function() {
+      if (App.state.dirty) {
+        App.dataSave();
+      }
+    }, 300000);
   },
 
   updateSaveUI: function() {
@@ -1017,6 +1027,11 @@ var App = {
     if (App.state.syncing) return;
     App.state.syncing = true;
     App.updateSaveUI();
+    // 清除自动保存定时器，防止重复保存
+    if (App.state.autoSaveTimer) {
+      clearTimeout(App.state.autoSaveTimer);
+      App.state.autoSaveTimer = null;
+    }
     try {
       var json = JSON.stringify({ todos: App.state.todos, recycleBin: App.state.recycleBin }, null, 2);
       var file = await App.apiGetFile();
@@ -1711,7 +1726,7 @@ var App = {
   },
 
   setupVersion: function() {
-    var ver = '1.2.0';
+    var ver = '1.3.0';
     var date = '2026-05-20';
     var el = document.getElementById('versionInfo');
     if (el) el.textContent = 'v' + ver + ' / ' + date;
