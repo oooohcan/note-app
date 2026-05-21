@@ -634,6 +634,7 @@ var App = {
     deleteConfirmTimeout: null,
     dirty: false,
     autoSaveTimer: null,
+    lastModifiedTime: null,
     syncing: false,
     loading: true
   },
@@ -701,11 +702,18 @@ var App = {
     if (App.state.autoSaveTimer) {
       clearTimeout(App.state.autoSaveTimer);
     }
+    // 保存上次修改时间，用于判断是否真的需要自动保存
+    App.state.lastModifiedTime = Date.now();
     App.state.autoSaveTimer = setTimeout(function() {
-      if (App.state.dirty) {
+      // 检查是否真的有5分钟无操作（防止被其他操作重置后还触发）
+      var elapsed = Date.now() - App.state.lastModifiedTime;
+      if (App.state.dirty && elapsed >= 290000) { // 稍微小于5分钟，防止误差
+        App.toast('自动保存中...');
         App.dataSave();
       }
     }, 300000);
+    // 调试日志（可在控制台看到）
+    console.log('自动保存定时器已设置，5分钟后执行');
   },
 
   updateSaveUI: function() {
@@ -1726,10 +1734,27 @@ var App = {
   },
 
   setupVersion: function() {
-    var ver = '1.3.0';
-    var date = '2026-05-20';
+    var ver = '1.3.1';
+    var date = '2026-05-21';
     var el = document.getElementById('versionInfo');
     if (el) el.textContent = 'v' + ver + ' / ' + date;
+  },
+
+  // 调试功能：快速测试自动保存（30秒）
+  setDebugAutoSave: function(seconds) {
+    if (App.state.autoSaveTimer) {
+      clearTimeout(App.state.autoSaveTimer);
+    }
+    var ms = seconds * 1000;
+    App.state.lastModifiedTime = Date.now();
+    App.state.autoSaveTimer = setTimeout(function() {
+      var elapsed = Date.now() - App.state.lastModifiedTime;
+      if (App.state.dirty && elapsed >= ms - 1000) {
+        App.toast('自动保存中...');
+        App.dataSave();
+      }
+    }, ms);
+    console.log('调试模式：' + seconds + '秒后自动保存');
   },
 
   confirmCallback: null,
